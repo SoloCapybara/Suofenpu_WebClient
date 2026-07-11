@@ -1,0 +1,10 @@
+<svg width="240" height="180" viewBox="0 0 240 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="240" height="180" rx="18" fill="#EEF4FF"/>
+  <circle cx="120" cy="84" r="42" fill="#D8E6FF"/>
+  <path d="M85 90C92 105 105 113 120 113C135 113 148 105 155 90" stroke="#6693E8" stroke-width="8" stroke-linecap="round"/>
+  <path d="M93 77C102 69 111 66 120 66C129 66 138 69 147 77" stroke="#6693E8" stroke-width="8" stroke-linecap="round"/>
+  <circle cx="105" cy="85" r="4" fill="#6693E8"/>
+  <circle cx="135" cy="85" r="4" fill="#6693E8"/>
+  <path d="M88 132H152" stroke="#A6C2F5" stroke-width="8" stroke-linecap="round"/>
+  <text x="120" y="157" text-anchor="middle" fill="#7796C9" font-family="Arial, PingFang SC, Microsoft YaHei, sans-serif" font-size="13">暂无商品展示图</text>
+</svg>

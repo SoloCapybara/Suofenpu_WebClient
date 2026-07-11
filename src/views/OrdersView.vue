@@ -1,0 +1,112 @@
+<script setup lang="ts">
+import { Refresh } from '@element-plus/icons-vue'
+import type { Order, OrderStatus } from '../types'
+import type { StatusMeta } from '../admin-types'
+
+defineProps<{
+  orders: Order[]
+  loading: boolean
+  orderStatusFilter: OrderStatus | ''
+  statusMeta: Record<OrderStatus, StatusMeta>
+}>()
+
+defineEmits<{
+  refresh: []
+  advance: [order: Order]
+  cancel: [order: Order]
+  'update:orderStatusFilter': [value: OrderStatus | '']
+}>()
+
+function money(value: number) {
+  return `¥${Number(value || 0).toFixed(2)}`
+}
+
+function formatDate(value: string) {
+  if (!value) return '-'
+  return new Date(value).toLocaleString('zh-CN', {
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+}
+
+function orderItemsText(order: Order) {
+  return order.items.map((item) => `${item.dishName} x${item.quantity}`).join('，')
+}
+</script>
+
+<template>
+  <section class="module-view">
+    <el-card>
+      <template #header>
+        <div class="panel-title">
+          <strong>订单管理</strong>
+          <div class="panel-actions">
+            <el-select
+              :model-value="orderStatusFilter"
+              placeholder="全部状态"
+              clearable
+              style="width: 160px"
+              @update:model-value="$emit('update:orderStatusFilter', $event as OrderStatus | '')"
+              @change="$emit('refresh')"
+            >
+              <el-option v-for="(meta, status) in statusMeta" :key="status" :label="meta.label" :value="status" />
+            </el-select>
+            <el-button :icon="Refresh" :loading="loading" @click="$emit('refresh')">刷新订单</el-button>
+          </div>
+        </div>
+      </template>
+      <el-table :data="orders" v-loading="loading" row-key="orderNo" empty-text="暂无订单">
+        <el-table-column type="expand">
+          <template #default="{ row }">
+            <div class="order-detail">
+              <p><strong>收货信息：</strong>{{ row.address }} / {{ row.phone }} / {{ row.deliveryTime }}</p>
+              <p><strong>备注：</strong>{{ row.orderRemark || '无' }}</p>
+              <el-table :data="row.items" size="small">
+                <el-table-column prop="dishName" label="商品" />
+                <el-table-column label="规格">
+                  <template #default="{ row: item }">{{ item.spec }} · {{ item.spice }} · {{ item.tableware }}</template>
+                </el-table-column>
+                <el-table-column prop="quantity" label="数量" width="80" />
+                <el-table-column label="小计" width="100">
+                  <template #default="{ row: item }">{{ money(item.lineTotal) }}</template>
+                </el-table-column>
+              </el-table>
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column prop="orderNo" label="订单号" min-width="190" />
+        <el-table-column label="顾客" min-width="150">
+          <template #default="{ row }">{{ row.customerName || '微信用户' }} / {{ row.phone }}</template>
+        </el-table-column>
+        <el-table-column label="商品" min-width="240">
+          <template #default="{ row }">{{ orderItemsText(row) }}</template>
+        </el-table-column>
+        <el-table-column label="金额" width="110">
+          <template #default="{ row }">{{ money(row.totalAmount) }}</template>
+        </el-table-column>
+        <el-table-column label="状态" width="110">
+          <template #default="{ row }">
+            <el-tag :type="statusMeta[row.status as OrderStatus].type">
+              {{ statusMeta[row.status as OrderStatus].label }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="下单时间" width="130">
+          <template #default="{ row }">{{ formatDate(row.createdAt) }}</template>
+        </el-table-column>
+        <el-table-column label="操作" width="200" fixed="right">
+          <template #default="{ row }">
+            <el-button v-if="statusMeta[row.status as OrderStatus].next" type="primary" size="small" @click="$emit('advance', row)">
+              {{ statusMeta[row.status as OrderStatus].action }}
+            </el-button>
+            <el-button v-if="!['COMPLETED', 'CANCELLED', 'REFUNDED'].includes(row.status)" type="danger" plain size="small" @click="$emit('cancel', row)">
+              取消
+            </el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+    </el-card>
+  </section>
+</template>
