@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { computed, reactive, ref } from 'vue'
 import { ArrowRight, CirclePlus, CollectionTag, Refresh, Search } from '@element-plus/icons-vue'
-import { ElMessage } from 'element-plus'
+import { AppMessage } from '../components/AppMessage'
+import AppButton from '../components/AppButton.vue'
 import type { Dish, DishCategory, DishCategoryPayload } from '../types'
 
 const props = defineProps<{
@@ -136,7 +137,7 @@ function submitCategory() {
   }
   if (!payload.code || !payload.name) return
   if (!payload.iconUrl) {
-    ElMessage.warning('请选择分类图标')
+    AppMessage.warning('请选择分类图标')
     return
   }
   if (editingCategoryId.value) {
@@ -184,8 +185,8 @@ function selectCategoryIcon(libraryKey: string, iconName: string) {
           <div class="category-actions">
             <span>整理菜单分类及展示顺序</span>
             <div class="panel-actions">
-              <el-button :icon="Refresh" circle :loading="loading" title="刷新分类" @click="$emit('refresh')" />
-              <el-button type="primary" :icon="CirclePlus" @click="openCreateCategory">新增分类</el-button>
+              <AppButton class="quiet-icon-button" :icon="Refresh" circle :loading="loading" title="刷新分类" @click="$emit('refresh')" />
+              <AppButton type="primary" :icon="CirclePlus" @click="openCreateCategory">新增分类</AppButton>
             </div>
           </div>
           <el-table class="dishes-table category-table" :data="categories" row-key="id" empty-text="暂无分类">
@@ -202,7 +203,7 @@ function selectCategoryIcon(libraryKey: string, iconName: string) {
             <el-table-column label="分类编码" min-width="150"><template #default="{ row }"><code class="category-code">{{ row.code }}</code></template></el-table-column>
             <el-table-column label="状态" width="100"><template #default="{ row }"><el-tag :type="row.enabled ? 'success' : 'info'">{{ row.enabled ? '启用' : '停用' }}</el-tag></template></el-table-column>
             <el-table-column label="操作" width="300" fixed="right" align="center">
-              <template #default="{ row }"><div class="dish-row-actions"><el-button @click="openEditCategory(row)">编辑</el-button><el-button :type="row.enabled ? 'warning' : 'success'" plain @click="$emit('updateCategory', row.id, { enabled: !row.enabled })">{{ row.enabled ? '停用' : '启用' }}</el-button><el-button type="danger" plain @click="$emit('deleteCategory', row)">删除</el-button></div></template>
+              <template #default="{ row }"><div class="dish-row-actions"><AppButton @click="openEditCategory(row)">编辑</AppButton><AppButton :type="row.enabled ? 'warning' : 'success'" plain @click="$emit('updateCategory', row.id, { enabled: !row.enabled })">{{ row.enabled ? '停用' : '启用' }}</AppButton><AppButton type="danger" plain @click="$emit('deleteCategory', row)">删除</AppButton></div></template>
             </el-table-column>
           </el-table>
         </div>
@@ -215,8 +216,8 @@ function selectCategoryIcon(libraryKey: string, iconName: string) {
           <h2>商品库</h2>
         </div>
         <div class="panel-actions">
-          <el-button class="quiet-icon-button" :icon="Refresh" circle :loading="loading" title="刷新商品" @click="$emit('refresh')" />
-          <el-button type="primary" :icon="CirclePlus" @click="$emit('create')">新增商品</el-button>
+          <AppButton class="quiet-icon-button" :icon="Refresh" circle :loading="loading" title="刷新商品" @click="$emit('refresh')" />
+          <AppButton type="primary" :icon="CirclePlus" @click="$emit('create')">新增商品</AppButton>
         </div>
       </header>
       <nav class="product-category-tabs" aria-label="商品分类筛选">
@@ -284,8 +285,8 @@ function selectCategoryIcon(libraryKey: string, iconName: string) {
         <el-table-column label="操作" width="170" align="left">
           <template #default="{ row }">
             <div class="dish-row-actions dish-row-actions-compact">
-              <el-button class="dish-edit-link" link @click="$emit('edit', row)">编辑 <el-icon><ArrowRight /></el-icon></el-button>
-              <el-button class="dish-delete-link" type="danger" link @click="$emit('remove', row)">删除</el-button>
+              <AppButton class="dish-edit-link" link @click="$emit('edit', row)">编辑 <el-icon><ArrowRight /></el-icon></AppButton>
+              <AppButton class="dish-delete-link" type="danger" link @click="$emit('remove', row)">删除</AppButton>
             </div>
           </template>
         </el-table-column>
@@ -306,7 +307,7 @@ function selectCategoryIcon(libraryKey: string, iconName: string) {
               <el-image v-if="categoryForm.iconUrl" :src="displayIconUrl(categoryForm.iconUrl)" fit="contain"><template #error><span>图标不可用</span></template></el-image>
               <span v-else>未选择</span>
             </div>
-            <el-button type="primary" plain @click="categoryIconPickerVisible = true">选择图标</el-button>
+            <AppButton type="primary" plain @click="categoryIconPickerVisible = true">选择图标</AppButton>
           </div>
         </el-form-item>
         <el-form-item label="排序">
@@ -317,8 +318,8 @@ function selectCategoryIcon(libraryKey: string, iconName: string) {
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="categoryDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="submitCategory">保存</el-button>
+        <AppButton @click="categoryDialogVisible = false">取消</AppButton>
+        <AppButton type="primary" @click="submitCategory">保存</AppButton>
       </template>
     </el-dialog>
 

@@ -1,0 +1,11 @@
+/* === orders.css: Orders view (lines 1119-1128) === */
+.orders-view {
+  width: 100%;
+  max-width: none;
+}
+
+.dish-name {
+  display: grid;
+  gap: 4px;
+}
+

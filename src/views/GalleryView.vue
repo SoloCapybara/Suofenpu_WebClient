@@ -14,7 +14,8 @@ import {
   Upload,
   UploadFilled,
 } from '@element-plus/icons-vue'
-import { ElMessage } from 'element-plus'
+import { AppMessage } from '../components/AppMessage'
+import AppButton from '../components/AppButton.vue'
 import type { GalleryResponse, ImageAsset } from '../types'
 
 const props = defineProps<{
@@ -103,7 +104,7 @@ function submitFolder() {
   const name = folderForm.name.trim()
   if (!name) return
   if (name.includes('/') || name.includes('\\')) {
-    ElMessage.warning('文件夹名称不能包含斜杠')
+    AppMessage.warning('文件夹名称不能包含斜杠')
     return
   }
   const path = activeFolder.value ? `${activeFolder.value}/${name}` : name
@@ -176,12 +177,12 @@ function onDrop(event: DragEvent) {
 function uploadFiles(files: File[]) {
   const imageFiles = files.filter((file) => file.type.startsWith('image/'))
   if (!imageFiles.length) {
-    ElMessage.warning('请选择图片文件')
+    AppMessage.warning('请选择图片文件')
     return
   }
   const oversized = imageFiles.find((file) => file.size > props.gallery.maxFileBytes)
   if (oversized) {
-    ElMessage.warning(`单张图片不能超过 ${sizeText(props.gallery.maxFileBytes)}`)
+    AppMessage.warning(`单张图片不能超过 ${sizeText(props.gallery.maxFileBytes)}`)
     return
   }
   imageFiles.forEach((file) => emit('upload', activeFolder.value, file))
@@ -207,7 +208,7 @@ function batchDelete() {
 
 async function copyImageUrl(image: ImageAsset) {
   await navigator.clipboard.writeText(image.imageUrl)
-  ElMessage.success('图片地址已复制')
+  AppMessage.success('图片地址已复制')
 }
 
 function sizeText(size: number) {
@@ -240,8 +241,8 @@ function dateText(value: string) {
           <el-option label="最新上传" value="timeDesc" />
           <el-option label="文件最大" value="sizeDesc" />
         </el-select>
-        <el-button type="primary" :icon="Upload" @click="triggerFileInput">上传图片</el-button>
-        <el-button :icon="Refresh" :loading="loading" @click="$emit('refresh')">刷新</el-button>
+        <AppButton type="primary" :icon="Upload" @click="triggerFileInput">上传图片</AppButton>
+        <AppButton :icon="Refresh" :loading="loading" @click="$emit('refresh')">刷新</AppButton>
         <input ref="fileInput" class="hidden-file-input" type="file" accept="image/*" multiple @change="onFileChange" />
       </div>
     </header>
@@ -256,7 +257,7 @@ function dateText(value: string) {
               <small>{{ allFolderItems.length }} 个文件夹</small>
             </div>
           </div>
-          <el-button class="gallery-sidebar-add" type="primary" plain :icon="FolderAdd" @click="openCreateFolder">新建</el-button>
+          <AppButton class="gallery-sidebar-add" type="primary" plain :icon="FolderAdd" @click="openCreateFolder">新建</AppButton>
         </div>
         <div class="gallery-folder-scroll">
           <button class="gallery-tree-item" :class="{ active: activeFolder === '' }" type="button" @click="selectFolder('')">
@@ -353,7 +354,7 @@ function dateText(value: string) {
             </div>
           </div>
           <div class="gallery-action-buttons">
-            <el-button
+            <AppButton
               class="gallery-batch-delete"
               type="danger"
               plain
@@ -362,7 +363,7 @@ function dateText(value: string) {
               @click="batchDelete"
             >
               {{ selectedImages.length ? `删除选中（${selectedImages.length}）` : '删除选中' }}
-            </el-button>
+            </AppButton>
             <span class="gallery-action-divider" />
             <div class="gallery-view-switch" aria-label="切换查看方式">
               <button type="button" :class="{ active: viewMode === 'grid' }" title="宫格视图" @click="viewMode = 'grid'">
@@ -395,9 +396,9 @@ function dateText(value: string) {
                 <span>{{ dateText(asset.updatedAt) }}</span>
               </div>
               <div class="gallery-file-actions">
-                <el-button link @click="previewImage = asset">预览</el-button>
-                <el-button link @click="copyImageUrl(asset)">复制地址</el-button>
-                <el-button link type="danger" @click="$emit('delete', asset)">删除</el-button>
+                <AppButton link @click="previewImage = asset">预览</AppButton>
+                <AppButton link @click="copyImageUrl(asset)">复制地址</AppButton>
+                <AppButton link type="danger" @click="$emit('delete', asset)">删除</AppButton>
               </div>
             </article>
           </div>
@@ -426,8 +427,8 @@ function dateText(value: string) {
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="folderDialogVisible = false">取消</el-button>
-        <el-button type="primary" :icon="FolderAdd" @click="submitFolder">创建</el-button>
+        <AppButton @click="folderDialogVisible = false">取消</AppButton>
+        <AppButton type="primary" :icon="FolderAdd" @click="submitFolder">创建</AppButton>
       </template>
     </el-dialog>
 

@@ -1,23 +1,18 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'element-plus'
+import { ElMessageBox, type FormInstance, type FormRules } from 'element-plus'
 import zhCn from 'element-plus/es/locale/lang/zh-cn'
 import {
   Bowl,
   Box,
   Coin,
-  DocumentChecked,
   Goods,
   House,
   Picture,
   Setting,
-  Shop,
   Tickets,
-  TrendCharts,
   UserFilled,
-  Van,
-  Warning,
 } from '@element-plus/icons-vue'
 import {
   createDish,
@@ -34,20 +29,22 @@ import {
   updateDishCategory,
   uploadImageAsset,
   updateOrderStatus,
+  logoutAdmin,
+  getCurrentAdmin,
 } from './api'
+import { clearAdminSession, getAdminToken, getStoredAdmin, updateStoredAdmin } from './auth'
 import type { GalleryResponse, Dish, DishCategory, DishCategoryPayload, DishPayload, ImageAsset, Order, OrderStatus } from './types'
 import type {
-  AnomalyCard,
   DishForm,
   NavItem,
   NavKey,
   Section,
   StatCard,
   StatusMeta,
-  StoreRow,
   TopOrderItem,
 } from './admin-types'
 import AdminLayout from './components/AdminLayout.vue'
+import { AppMessage } from './components/AppMessage'
 import DishEditorDialog from './components/DishEditorDialog.vue'
 import DashboardView from './views/DashboardView.vue'
 import DishesView from './views/DishesView.vue'
@@ -55,6 +52,9 @@ import GalleryView from './views/GalleryView.vue'
 import NotFoundView from './views/NotFoundView.vue'
 import OrdersView from './views/OrdersView.vue'
 import SettingsView from './views/SettingsView.vue'
+import ProfileView from './views/ProfileView.vue'
+import UserManagementView from './views/UserManagementView.vue'
+import { runThemeTransition } from './utils/theme-transition'
 
 const route = useRoute()
 const router = useRouter()
@@ -63,6 +63,27 @@ const ordersLoading = ref(false)
 const dishesLoading = ref(false)
 const imageAssetsLoading = ref(false)
 const storeOpen = ref(true)
+const darkMode = ref(localStorage.getItem('admin-theme') !== 'light')
+const currentAdmin = ref(getStoredAdmin())
+
+watch(
+  darkMode,
+  (enabled) => {
+    document.documentElement.classList.toggle('dark', enabled)
+    document.documentElement.style.colorScheme = enabled ? 'dark' : 'light'
+    localStorage.setItem('admin-theme', enabled ? 'dark' : 'light')
+  },
+  { immediate: true },
+)
+
+async function toggleDarkMode() {
+  const next = !darkMode.value
+  await runThemeTransition(async () => {
+    darkMode.value = next
+    await nextTick()
+  })
+}
+
 const orderStatusFilter = ref<OrderStatus | ''>('')
 const orders = ref<Order[]>([])
 const dishes = ref<Dish[]>([])
@@ -99,19 +120,22 @@ const settings = reactive({
 })
 
 const sectionTitles: Record<Section, string> = {
-  dashboard: '首页总览',
+  dashboard: '今日经营',
   orders: '订单管理',
   dishes: '菜品管理',
   gallery: '图库管理',
   settings: '系统设置',
+  users: '用户管理',
+  profile: '个人中心',
   notFound: '404',
 }
 
 const navItems = [
-  { key: 'home', section: 'dashboard', path: '/', label: '首页总览', icon: House },
+  { key: 'home', section: 'dashboard', path: '/', label: '今日经营', icon: House },
   { key: 'orders', section: 'orders', path: '/orders', label: '订单管理', icon: Tickets },
   { key: 'goods', section: 'dishes', path: '/dishes', label: '商品管理', icon: Goods },
   { key: 'gallery', section: 'gallery', path: '/gallery', label: '图库管理', icon: Picture },
+  { key: 'users', section: 'users', path: '/users', label: '用户管理', icon: UserFilled },
   { key: 'settings', section: 'settings', path: '/settings', label: '系统设置', icon: Setting },
 ] as const satisfies readonly NavItem[]
 
@@ -158,91 +182,42 @@ const topOrderItems = computed<TopOrderItem[]>(() => {
     .sort((a, b) => b.count - a.count)
     .slice(0, 6)
 })
-const activeDishCount = computed(() => dishes.value.filter((dish) => dish.available).length)
 const todayOrderCount = computed(() => orders.value.length)
-const customerCount = computed(() => new Set(orders.value.map((order) => order.phone).filter(Boolean)).size)
-const takeawayRatio = computed(() => {
-  if (!orders.value.length) return 0
-  return Math.round((orders.value.filter((order) => order.address && !order.address.includes('桌')).length / orders.value.length) * 100)
-})
+const pendingOrderStatuses = ['PAID', 'ACCEPTED', 'PREPARING', 'DELIVERING'] as const
+const pendingOrders = computed(() =>
+  orders.value.filter((order) => pendingOrderStatuses.includes(order.status as (typeof pendingOrderStatuses)[number])),
+)
+const pendingOrderCount = computed(() => pendingOrders.value.length)
 
 const statCards = computed<StatCard[]>(() => [
   {
-    label: '门店总数',
-    value: '1',
-    unit: '',
-    icon: Shop,
-    color: 'blue',
-    delta: '0',
-    trend: '42,64 66,58 90,42 114,50 138,36 162,48 186,30',
-  },
-  {
-    label: '今日总营业额',
+    label: '今日营业额',
     value: money(todayRevenue.value),
     unit: '',
     icon: Coin,
     color: 'green',
-    delta: '+12.6%',
-    trend: '42,58 66,48 90,44 114,52 138,36 162,46 186,32',
   },
   {
-    label: '今日总订单',
+    label: '今日订单',
     value: String(todayOrderCount.value),
-    unit: '',
+    unit: '单',
     icon: Tickets,
     color: 'purple',
-    delta: '+15.2%',
-    trend: '42,62 66,56 90,60 114,44 138,52 162,38 186,48',
   },
   {
-    label: '总客流量',
-    value: String(customerCount.value || todayOrderCount.value),
-    unit: '',
-    icon: UserFilled,
-    color: 'orange',
-    delta: '+13.4%',
-    trend: '42,60 66,50 90,48 114,56 138,44 162,58 186,42',
-  },
-  {
-    label: '在售商品',
-    value: String(activeDishCount.value),
-    unit: '',
+    label: '待处理订单',
+    value: String(pendingOrderCount.value),
+    unit: '单',
     icon: Bowl,
-    color: 'cyan',
-    delta: '+11.8%',
-    trend: '42,60 66,54 90,50 114,56 138,42 162,48 186,36',
+    color: 'orange',
   },
   {
-    label: '外卖订单占比',
-    value: `${takeawayRatio.value}`,
-    unit: '%',
-    icon: Van,
+    label: '库存预警',
+    value: String(lowStockDishes.value.length),
+    unit: '项',
+    icon: Box,
     color: 'blue',
-    delta: '+3.6%',
-    trend: '42,58 66,52 90,62 114,54 138,48 162,52 186,44',
   },
-])
-
-const storeRows = computed<StoreRow[]>(() =>
-  dishes.value.slice(0, 8).map((dish, index) => ({
-    code: `S${String(index + 1).padStart(3, '0')}`,
-    name: dish.name,
-    area: '鹿寨县',
-    type: index % 3 === 1 ? '加盟店' : '直营店',
-    revenue: Number(dish.price || 0) * Math.max(1, Math.min(dish.stock, 28)),
-    orders: Math.max(8, Math.round(dish.stock / 2)),
-    visitors: Math.max(28, dish.stock + 74),
-    avg: Number(dish.price || 0) + 8,
-    efficiency: Math.max(72, dish.stock + 42),
-    available: dish.available,
-  })),
-)
-
-const anomalyCards = computed<AnomalyCard[]>(() => [
-  { label: '设备待维护', value: '2 家', icon: Warning, color: 'red', line: '26,56 52,48 78,54 104,36 130,42 156,24' },
-  { label: '库存预警门店', value: `${lowStockDishes.value.length || 0} 家`, icon: Box, color: 'orange', line: '26,44 52,34 78,42 104,40 130,30 156,26' },
-  { label: '客诉待处理', value: '1 条', icon: DocumentChecked, color: 'purple', line: '26,58 52,52 78,44 104,46 130,36 156,28' },
-  { label: '坪效偏低门店', value: '2 家', icon: TrendCharts, color: 'blue', line: '26,58 52,54 78,48 104,42 130,38 156,30' },
 ])
 
 function money(value: number) {
@@ -254,7 +229,7 @@ async function refreshOrders() {
   try {
     orders.value = await listOrders(orderStatusFilter.value)
   } catch (error) {
-    ElMessage.error((error as Error).message)
+    AppMessage.error((error as Error).message)
   } finally {
     ordersLoading.value = false
   }
@@ -267,7 +242,7 @@ async function refreshDishes() {
     dishCategories.value = categories
     dishes.value = dishList
   } catch (error) {
-    ElMessage.error((error as Error).message)
+    AppMessage.error((error as Error).message)
   } finally {
     dishesLoading.value = false
   }
@@ -278,7 +253,7 @@ async function refreshImageAssets() {
   try {
     gallery.value = await listImageAssets()
   } catch (error) {
-    ElMessage.error((error as Error).message)
+    AppMessage.error((error as Error).message)
   } finally {
     imageAssetsLoading.value = false
   }
@@ -299,9 +274,9 @@ async function advanceOrder(order: Order) {
   try {
     const updated = await updateOrderStatus(order.orderNo, next)
     replaceOrder(updated)
-    ElMessage.success(`订单 ${order.orderNo} 已更新为${statusMeta[next].label}`)
+    AppMessage.success(`订单 ${order.orderNo} 已更新为${statusMeta[next].label}`)
   } catch (error) {
-    ElMessage.error((error as Error).message)
+    AppMessage.error((error as Error).message)
   }
 }
 
@@ -314,9 +289,9 @@ async function cancelOrder(order: Order) {
     })
     const updated = await updateOrderStatus(order.orderNo, 'CANCELLED')
     replaceOrder(updated)
-    ElMessage.success('订单已取消')
+    AppMessage.success('订单已取消')
   } catch (error) {
-    if (error instanceof Error) ElMessage.error(error.message)
+    if (error instanceof Error) AppMessage.error(error.message)
   }
 }
 
@@ -376,15 +351,15 @@ async function submitDish() {
     if (dishForm.id) {
       const updated = await updateDish(dishForm.id, payload)
       replaceDish(updated)
-      ElMessage.success('菜品已更新')
+      AppMessage.success('菜品已更新')
     } else {
       const created = await createDish(payload)
       dishes.value.unshift(created)
-      ElMessage.success('菜品已新增')
+      AppMessage.success('菜品已新增')
     }
     dishDialogVisible.value = false
   } catch (error) {
-    ElMessage.error((error as Error).message)
+    AppMessage.error((error as Error).message)
   }
 }
 
@@ -392,9 +367,9 @@ async function toggleDish(dish: Dish) {
   try {
     const updated = await updateDish(dish.id, { available: !dish.available })
     replaceDish(updated)
-    ElMessage.success(`${dish.name}${updated.available ? '已上架' : '已下架'}`)
+    AppMessage.success(`${dish.name}${updated.available ? '已上架' : '已下架'}`)
   } catch (error) {
-    ElMessage.error((error as Error).message)
+    AppMessage.error((error as Error).message)
   }
 }
 
@@ -407,9 +382,9 @@ async function removeDish(dish: Dish) {
     })
     await deleteDish(dish.id)
     dishes.value = dishes.value.filter((item) => item.id !== dish.id)
-    ElMessage.success('商品已删除')
+    AppMessage.success('商品已删除')
   } catch (error) {
-    if (error instanceof Error) ElMessage.error(error.message)
+    if (error instanceof Error) AppMessage.error(error.message)
   }
 }
 
@@ -417,9 +392,9 @@ async function createCategory(payload: Required<DishCategoryPayload>) {
   try {
     await createDishCategory(payload)
     await refreshDishes()
-    ElMessage.success('分类已新增')
+    AppMessage.success('分类已新增')
   } catch (error) {
-    ElMessage.error((error as Error).message)
+    AppMessage.error((error as Error).message)
   }
 }
 
@@ -427,9 +402,9 @@ async function updateCategory(id: number, payload: DishCategoryPayload) {
   try {
     await updateDishCategory(id, payload)
     await refreshDishes()
-    ElMessage.success('分类已更新')
+    AppMessage.success('分类已更新')
   } catch (error) {
-    ElMessage.error((error as Error).message)
+    AppMessage.error((error as Error).message)
   }
 }
 
@@ -442,9 +417,9 @@ async function removeCategory(category: DishCategory) {
     })
     await deleteDishCategory(category.id)
     await refreshDishes()
-    ElMessage.success('分类已删除')
+    AppMessage.success('分类已删除')
   } catch (error) {
-    if (error instanceof Error) ElMessage.error(error.message)
+    if (error instanceof Error) AppMessage.error(error.message)
   }
 }
 
@@ -452,9 +427,9 @@ async function createGalleryFolder(path: string) {
   try {
     await createImageFolder(path)
     await refreshImageAssets()
-    ElMessage.success('图库目录已创建')
+    AppMessage.success('图库目录已创建')
   } catch (error) {
-    ElMessage.error((error as Error).message)
+    AppMessage.error((error as Error).message)
   }
 }
 
@@ -462,9 +437,9 @@ async function uploadGalleryImage(folder: string, file: File) {
   try {
     await uploadImageAsset(folder, file)
     await refreshImageAssets()
-    ElMessage.success('图片已上传')
+    AppMessage.success('图片已上传')
   } catch (error) {
-    ElMessage.error((error as Error).message)
+    AppMessage.error((error as Error).message)
   }
 }
 
@@ -477,9 +452,9 @@ async function removeGalleryImage(imageAsset: ImageAsset) {
     })
     await deleteImageAsset(imageAsset.id)
     await refreshImageAssets()
-    ElMessage.success('图库图片已删除')
+    AppMessage.success('图库图片已删除')
   } catch (error) {
-    if (error instanceof Error) ElMessage.error(error.message)
+    if (error instanceof Error) AppMessage.error(error.message)
   }
 }
 
@@ -493,9 +468,9 @@ async function removeGalleryImages(imageAssets: ImageAsset[]) {
     })
     await Promise.all(imageAssets.map((imageAsset) => deleteImageAsset(imageAsset.id)))
     await refreshImageAssets()
-    ElMessage.success('图库图片已批量删除')
+    AppMessage.success('图库图片已批量删除')
   } catch (error) {
-    if (error instanceof Error) ElMessage.error(error.message)
+    if (error instanceof Error) AppMessage.error(error.message)
   }
 }
 
@@ -505,7 +480,7 @@ function replaceDish(updated: Dish) {
 }
 
 function saveSettings() {
-  ElMessage.success('门店设置已保存到当前页面状态')
+  AppMessage.success('门店设置已保存到当前页面状态')
 }
 
 function selectNav(key: string) {
@@ -514,32 +489,78 @@ function selectNav(key: string) {
   router.push(item.path)
 }
 
+async function handleLogout() {
+  try {
+    await logoutAdmin()
+  } catch {
+    // The local session must still be cleared if the server session already expired.
+  }
+  clearAdminSession()
+  await router.replace('/login')
+  AppMessage.success('已安全退出')
+}
+
+function syncAdminSession() {
+  currentAdmin.value = getStoredAdmin()
+  if (currentAdmin.value && route.meta.public) refreshAll()
+}
+
+async function refreshCurrentAdmin() {
+  if (!getAdminToken()) return
+  try {
+    const profile = await getCurrentAdmin()
+    currentAdmin.value = profile
+    updateStoredAdmin(profile)
+  } catch {
+    // The HTTP interceptor handles expired sessions and redirects to login.
+  }
+}
+
 onMounted(() => {
-  refreshAll()
+  window.addEventListener('admin-auth-changed', syncAdminSession)
+  if (getAdminToken() && !route.meta.public) {
+    refreshCurrentAdmin()
+    refreshAll()
+  }
 })
+
+onBeforeUnmount(() => window.removeEventListener('admin-auth-changed', syncAdminSession))
 </script>
 
 <template>
   <el-config-provider :locale="zhCn">
+  <router-view v-if="route.meta.public" />
+  <template v-else>
   <AdminLayout
     v-loading="loading"
     v-model:store-open="storeOpen"
+    :dark-mode="darkMode"
     :active-nav="activeNav"
     :nav-items="navItems"
+    :admin-name="currentAdmin?.displayName || '管理员'"
+    :admin-role="currentAdmin?.role || 'OWNER'"
     @select-nav="selectNav"
+    @toggle-dark-mode="toggleDarkMode"
     @refresh="refreshAll"
+    @logout="handleLogout"
+    @profile="router.push('/profile')"
   >
     <DashboardView
       v-if="activeSection === 'dashboard'"
-      v-model:order-status-filter="orderStatusFilter"
       :stat-cards="statCards"
-      :store-rows="storeRows"
+      :pending-orders="pendingOrders"
+      :low-stock-dishes="lowStockDishes"
       :top-order-items="topOrderItems"
-      :anomaly-cards="anomalyCards"
-      :today-revenue="todayRevenue"
       :status-meta="statusMeta"
-      @create-dish="openCreateDish"
-      @refresh-orders="refreshOrders"
+      :store-name="settings.storeName"
+      :business-hours="settings.businessHours"
+      :notice="settings.notice"
+      :store-open="storeOpen"
+      :loading="loading"
+      @refresh="refreshAll"
+      @go-orders="router.push('/orders')"
+      @go-dishes="router.push('/dishes')"
+      @advance="advanceOrder"
     />
 
     <OrdersView
@@ -576,6 +597,17 @@ onMounted(() => {
       @save="saveSettings"
     />
 
+    <ProfileView
+      v-else-if="activeSection === 'profile'"
+      :profile="currentAdmin"
+      @updated="currentAdmin = $event"
+    />
+
+    <UserManagementView
+      v-else-if="activeSection === 'users'"
+      :current-admin="currentAdmin"
+    />
+
     <GalleryView
     v-else-if="activeSection === 'gallery'"
       :gallery="gallery"
@@ -599,5 +631,6 @@ onMounted(() => {
     :image-assets="gallery.images"
     @submit="submitDish"
   />
+  </template>
   </el-config-provider>
 </template>

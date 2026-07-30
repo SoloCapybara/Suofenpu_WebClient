@@ -1,0 +1,184 @@
+/* === gallery-dark.css: Gallery dark mode (lines 3910-4092) === */
+/* Gallery dark mode ------------------------------------------------------- */
+html.dark .gallery-sidebar,
+html.dark .gallery-content-card {
+  color: var(--text);
+  border-color: var(--line);
+  background: var(--panel);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.2);
+}
+
+html.dark .gallery-sidebar {
+  background:
+    radial-gradient(circle at 0 0, rgba(83, 139, 248, 0.12), transparent 170px),
+    linear-gradient(180deg, #1b202a 0%, #181d26 100%);
+}
+
+html.dark .gallery-sidebar-title,
+html.dark .gallery-breadcrumb,
+html.dark .gallery-pagination {
+  color: var(--text);
+  border-color: var(--line);
+}
+
+html.dark .gallery-sidebar-heading strong,
+html.dark .gallery-storage-card strong,
+html.dark .gallery-stat-card strong,
+html.dark .gallery-selection-summary strong,
+html.dark .gallery-file-body strong,
+html.dark .gallery-folder-empty strong {
+  color: var(--text);
+}
+
+html.dark .gallery-sidebar-heading small,
+html.dark .gallery-storage-card span,
+html.dark .gallery-storage-card small,
+html.dark .gallery-stat-card span,
+html.dark .gallery-selection-summary span,
+html.dark .gallery-file-body span,
+html.dark .gallery-folder-empty small {
+  color: var(--muted);
+}
+
+html.dark .gallery-sidebar-heading > span {
+  color: #82adff;
+  background: #263754;
+  box-shadow: inset 0 0 0 1px #354c70;
+}
+
+html.dark .gallery-tree-item {
+  color: #b7c1d0;
+}
+
+html.dark .gallery-tree-item:hover {
+  color: #8bb4ff;
+  border-color: #394b68;
+  background: #232d3d;
+}
+
+html.dark .gallery-tree-item.active {
+  color: #9bbdff;
+  border-color: #3f5d8c;
+  background: linear-gradient(90deg, #263b5d, #202c40);
+  box-shadow: none;
+}
+
+html.dark .gallery-folder-icon {
+  color: #f0bd58;
+  background: #3a3122;
+}
+
+html.dark .gallery-folder-icon.all,
+html.dark .gallery-tree-item.active .gallery-folder-icon {
+  color: #91b7ff;
+  background: #2a3c5d;
+}
+
+html.dark .gallery-tree-item b,
+html.dark .gallery-tree-item.active b {
+  color: #b9c8df;
+  background: #2b3441;
+}
+
+html.dark .gallery-tree-back {
+  color: #a5b1c3;
+}
+
+html.dark .gallery-tree-back:hover,
+html.dark .gallery-current-folder {
+  color: #9bbdff;
+  background: #23334d;
+}
+
+html.dark .gallery-current-folder small {
+  color: var(--muted);
+}
+
+html.dark .gallery-current-folder strong {
+  color: #9bbdff;
+}
+
+html.dark .gallery-folder-empty {
+  color: #aeb9c9;
+  border-color: #405574;
+  background: rgba(34, 44, 60, 0.74);
+}
+
+html.dark .gallery-folder-empty:hover {
+  border-color: #5e83bd;
+  background: #26354d;
+}
+
+html.dark .gallery-folder-empty-icon {
+  color: #8bb4ff;
+  background: #293d60;
+}
+
+html.dark .gallery-storage-card {
+  border-color: #35465f;
+  background: linear-gradient(135deg, #202a39, #20252f);
+}
+
+html.dark .gallery-stat-card,
+html.dark .gallery-file-card {
+  color: var(--text);
+  border-color: var(--line);
+  background: #202630;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.16);
+}
+
+html.dark .gallery-dropzone {
+  color: #9cb9e7;
+  border-color: #49658f;
+  background: #1d293b;
+}
+
+html.dark .gallery-dropzone.active {
+  border-color: #76a4f7;
+  background: #253957;
+}
+
+html.dark .gallery-action-row {
+  border-color: var(--line);
+  background: #181d26;
+}
+
+html.dark .gallery-action-divider {
+  background: var(--line);
+}
+
+html.dark .gallery-view-switch {
+  border-color: #3a4352;
+  background: #242b36;
+}
+
+html.dark .gallery-view-switch button {
+  color: #aab5c6;
+}
+
+html.dark .gallery-view-switch button:hover,
+html.dark .gallery-view-switch button.active {
+  color: #94b9ff;
+}
+
+html.dark .gallery-view-switch button.active {
+  background: #34425a;
+  box-shadow: none;
+}
+
+html.dark .gallery-file-grid.list-view .gallery-file-image,
+html.dark .gallery-file-grid.list-view .gallery-file-actions {
+  border-color: var(--line);
+}
+
+html.dark .gallery-file-image,
+html.dark .gallery-image-error {
+  color: var(--muted);
+  background: #171c24;
+}
+
+html.dark .gallery-create-location {
+  color: #bec9da;
+  background: #29313d;
+}
+

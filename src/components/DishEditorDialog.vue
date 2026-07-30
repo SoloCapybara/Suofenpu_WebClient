@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import AppButton from './AppButton.vue'
 import { computed, ref } from 'vue'
 import type { FormInstance, FormRules } from 'element-plus'
 import { Picture } from '@element-plus/icons-vue'
@@ -63,10 +64,10 @@ function selectImage(imageAsset: ImageAsset) {
             </div>
           </div>
           <div class="dish-image-actions">
-            <el-button type="primary" plain :icon="Picture" @click="imagePickerVisible = true">
+            <AppButton type="primary" plain :icon="Picture" @click="imagePickerVisible = true">
               {{ dishForm.imageUrl ? '更换图片' : '选择图片' }}
-            </el-button>
-            <el-button v-if="dishForm.imageUrl" type="danger" link @click="dishForm.imageUrl = ''">移除图片</el-button>
+            </AppButton>
+            <AppButton v-if="dishForm.imageUrl" type="danger" link @click="dishForm.imageUrl = ''">移除图片</AppButton>
             <small>从图库中选择商品展示图片</small>
           </div>
         </div>
@@ -88,8 +89,8 @@ function selectImage(imageAsset: ImageAsset) {
       </el-form-item>
     </el-form>
     <template #footer>
-      <el-button @click="$emit('update:visible', false)">取消</el-button>
-      <el-button type="primary" @click="$emit('submit')">保存</el-button>
+      <AppButton @click="$emit('update:visible', false)">取消</AppButton>
+      <AppButton type="primary" @click="$emit('submit')">保存</AppButton>
     </template>
   </el-dialog>
 

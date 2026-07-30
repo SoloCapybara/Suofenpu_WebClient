@@ -1,0 +1,126 @@
+/* === dishes-dark.css: Dishes / product dark mode (lines 3785-3909) === */
+/* Product management dark-mode corrections. Keep this block after the
+   product workspace styles so no light-only declaration can override it. */
+html.dark .dishes-heading h1,
+html.dark .product-workbench-head h2,
+html.dark .category-collapse-title strong,
+html.dark .category-name,
+html.dark .dish-name strong,
+html.dark .dish-price,
+html.dark .dish-stock b {
+  color: var(--text);
+}
+
+html.dark .dishes-heading p,
+html.dark .category-collapse-title small,
+html.dark .category-actions > span,
+html.dark .filter-result,
+html.dark .dish-name span,
+html.dark .dish-name small,
+html.dark .dish-stock small,
+html.dark .dish-availability {
+  color: var(--muted);
+}
+
+html.dark .product-summary,
+html.dark .product-workbench,
+html.dark .category-collapse,
+html.dark .category-collapse .el-collapse-item__header,
+html.dark .category-collapse .el-collapse-item__wrap {
+  color: var(--text);
+  border-color: var(--line);
+  background: var(--panel);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.2);
+}
+
+html.dark .summary-lead,
+html.dark .summary-stat,
+html.dark .product-category-tabs,
+html.dark .product-toolbar {
+  border-color: var(--line);
+}
+
+html.dark .summary-lead > span,
+html.dark .summary-lead small,
+html.dark .summary-stat small,
+html.dark .summary-stat span {
+  color: var(--muted);
+}
+
+html.dark .summary-lead strong,
+html.dark .summary-stat strong {
+  color: var(--text);
+}
+
+html.dark .product-category-tabs button {
+  color: #aab4c4;
+}
+
+html.dark .product-category-tabs button span {
+  color: #9aa6b8;
+  background: #282f3a;
+}
+
+html.dark .product-category-tabs button:hover,
+html.dark .product-category-tabs button.active,
+html.dark .product-category-tabs button.active span {
+  color: #ff8a64;
+}
+
+html.dark .product-category-tabs button.active span {
+  background: #3b2925;
+}
+
+html.dark .product-toolbar {
+  background: #181d26;
+}
+
+html.dark .product-toolbar .el-input__wrapper,
+html.dark .product-toolbar .el-select__wrapper {
+  background: #202630;
+  box-shadow: 0 0 0 1px var(--el-border-color) inset;
+}
+
+html.dark .product-workbench .dishes-table {
+  --el-table-bg-color: var(--panel);
+  --el-table-tr-bg-color: var(--panel);
+  --el-table-header-bg-color: #202630;
+  --el-table-row-hover-bg-color: #242d3a;
+  --el-table-border-color: var(--line);
+  --el-table-text-color: #dce3ed;
+  --el-table-header-text-color: #aeb9ca;
+}
+
+html.dark .product-workbench .dishes-table th.el-table__cell {
+  color: #aeb9ca;
+}
+
+html.dark .dish-thumb {
+  border-color: var(--line);
+  background: #252c37;
+}
+
+html.dark .dish-category-pill,
+html.dark .category-code,
+html.dark .sort-badge {
+  color: #c2ccda;
+  background: #29313d;
+}
+
+html.dark .dish-edit-link {
+  color: #aeb9ca !important;
+}
+
+html.dark .quiet-icon-button.app-button.el-button {
+  color: #b6c0cf;
+  border-color: #3a4352;
+  background: #242b36;
+}
+
+html.dark .quiet-icon-button.app-button.el-button:hover,
+html.dark .quiet-icon-button.app-button.el-button:focus-visible {
+  color: #8bb4ff;
+  border-color: #5875a5;
+  background: #29364b;
+}
+

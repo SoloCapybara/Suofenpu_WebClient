@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import AppButton from '../components/AppButton.vue'
 defineProps<{
   title: string
   settings: {
@@ -20,7 +21,7 @@ defineEmits<{
       <template #header>
         <div class="panel-title">
           <strong>{{ title }}</strong>
-          <el-button type="primary" @click="$emit('save')">保存设置</el-button>
+          <AppButton type="primary" @click="$emit('save')">保存设置</AppButton>
         </div>
       </template>
       <el-form label-width="100px" class="settings-form">

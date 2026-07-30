@@ -1,5 +1,7 @@
 import { defineComponent } from 'vue'
 import { createRouter, createWebHashHistory, type RouteRecordRaw } from 'vue-router'
+import { getAdminToken } from '../auth'
+import LoginView from '../views/LoginView.vue'
 
 const RouteHost = defineComponent({
   name: 'RouteHost',
@@ -8,10 +10,16 @@ const RouteHost = defineComponent({
 
 export const routes = [
   {
+    path: '/login',
+    name: 'login',
+    component: LoginView,
+    meta: { public: true, title: '管理端登录' },
+  },
+  {
     path: '/',
     name: 'dashboard',
     component: RouteHost,
-    meta: { section: 'dashboard', navKey: 'home', title: '首页总览' },
+    meta: { section: 'dashboard', navKey: 'home', title: '今日经营' },
   },
   {
     path: '/orders',
@@ -36,6 +44,18 @@ export const routes = [
     name: 'settings',
     component: RouteHost,
     meta: { section: 'settings', navKey: 'settings', title: '系统设置' },
+  },
+  {
+    path: '/users',
+    name: 'users',
+    component: RouteHost,
+    meta: { section: 'users', navKey: 'users', title: '用户管理' },
+  },
+  {
+    path: '/profile',
+    name: 'profile',
+    component: RouteHost,
+    meta: { section: 'profile', navKey: '', title: '个人中心' },
   },
   {
     path: '/storeData',
@@ -90,4 +110,12 @@ export const routes = [
 export const router = createRouter({
   history: createWebHashHistory(),
   routes,
+})
+
+router.beforeEach((to) => {
+  const loggedIn = Boolean(getAdminToken())
+  if (to.meta.public && loggedIn) return { path: '/' }
+  if (!to.meta.public && !loggedIn) return { path: '/login', query: { redirect: to.fullPath } }
+  document.title = `${String(to.meta.title || '管理后台')} - 粉店经营后台`
+  return true
 })

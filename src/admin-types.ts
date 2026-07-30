@@ -1,7 +1,7 @@
 import type { Component } from 'vue'
 import type { OrderStatus } from './types'
 
-export type Section = 'dashboard' | 'orders' | 'dishes' | 'gallery' | 'settings' | 'notFound'
+export type Section = 'dashboard' | 'orders' | 'dishes' | 'gallery' | 'users' | 'settings' | 'profile' | 'notFound'
 
 export type NavKey =
   | 'home'
@@ -16,6 +16,7 @@ export type NavKey =
   | 'stock'
   | 'marketing'
   | 'settings'
+  | 'users'
 
 export interface NavItem {
   key: NavKey
@@ -50,32 +51,9 @@ export interface StatCard {
   unit: string
   icon: Component
   color: string
-  delta: string
-  trend: string
-}
-
-export interface StoreRow {
-  code: string
-  name: string
-  area: string
-  type: string
-  revenue: number
-  orders: number
-  visitors: number
-  avg: number
-  efficiency: number
-  available: boolean
 }
 
 export interface TopOrderItem {
   name: string
   count: number
-}
-
-export interface AnomalyCard {
-  label: string
-  value: string
-  icon: Component
-  color: string
-  line: string
 }

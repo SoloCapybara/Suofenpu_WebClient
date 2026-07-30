@@ -1,0 +1,22 @@
+/* === theme-ripple.css: Theme view-transition ripple (lines 4550-4570) === */
+/* Theme ripple transition ----------------------------------------------- */
+/* Default: disable UA crossfade. Active ripple keyframes are injected in JS
+   with literal px coordinates (view-transition pseudos don't inherit vars). */
+::view-transition-image-pair(root) {
+  isolation: auto;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+  display: block;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}

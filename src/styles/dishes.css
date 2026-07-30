@@ -1,0 +1,337 @@
+/* === dishes.css: Dishes / category tables (core) (lines 1129-1464) === */
+.dishes-view {
+  width: 100%;
+  max-width: none;
+  gap: 16px;
+}
+
+.dishes-heading {
+  min-height: 76px;
+  padding: 0 2px;
+  border: 0;
+  border-radius: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  background: transparent;
+  box-shadow: none;
+}
+
+.dishes-heading h1 {
+  margin: 0;
+  color: #17233d;
+  font-size: 26px;
+  font-weight: 900;
+}
+
+.dishes-heading p {
+  margin: 5px 0 0;
+  color: #6e7c94;
+  font-size: 13px;
+}
+
+.dishes-overview {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.dish-metric {
+  min-height: 78px;
+  padding: 13px 16px;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: #fff;
+  box-shadow: 0 8px 22px rgba(32, 54, 96, 0.055);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dish-metric:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(32, 54, 96, 0.1);
+}
+
+.dish-metric-icon {
+  width: 46px;
+  height: 46px;
+  flex: 0 0 auto;
+  border-radius: 13px;
+  display: grid;
+  place-items: center;
+  font-size: 22px;
+}
+
+.dish-metric.blue .dish-metric-icon { color: #2f73ff; background: #e9f1ff; }
+.dish-metric.green .dish-metric-icon { color: #19a960; background: #e8f9ef; }
+.dish-metric.orange .dish-metric-icon { color: #e99016; background: #fff4df; }
+.dish-metric.purple .dish-metric-icon { color: #7953df; background: #f0ebff; }
+
+.dish-metric small,
+.dish-metric strong,
+.dish-metric em {
+  display: inline-block;
+}
+
+.dish-metric small {
+  width: 100%;
+  margin-bottom: 5px;
+  color: #7a879d;
+  font-size: 12px;
+}
+
+.dish-metric strong {
+  color: #17233d;
+  font-size: 24px;
+  line-height: 1;
+}
+
+.dish-metric em {
+  margin-left: 6px;
+  color: #929caf;
+  font-size: 11px;
+  font-style: normal;
+}
+
+.dishes-panel {
+  border-radius: 13px;
+  overflow: hidden;
+  box-shadow: 0 5px 18px rgba(32, 54, 96, 0.045);
+}
+
+.dishes-panel .el-card__header {
+  padding: 15px 18px;
+  background: #fbfdff;
+}
+
+.dishes-panel-title {
+  min-height: 42px;
+}
+
+.dishes-title-copy {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+
+.dishes-title-copy strong,
+.dishes-title-copy small {
+  display: block;
+}
+
+.dishes-title-copy small {
+  margin-top: 4px;
+  color: #8490a5;
+  font-size: 11px;
+}
+
+.dishes-title-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  color: #2f73ff;
+  background: #e8f1ff;
+  font-size: 19px;
+}
+
+.dishes-title-icon.amber {
+  color: #df941e;
+  background: #fff3dc;
+}
+
+.dishes-table {
+  --el-table-header-bg-color: #f7f9fd;
+  --el-table-row-hover-bg-color: #f5f9ff;
+  --el-table-border-color: #edf1f7;
+}
+
+.dishes-table th.el-table__cell {
+  height: 46px;
+  color: #6b7890;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.dishes-table td.el-table__cell {
+  padding: 11px 0;
+}
+
+.dish-row-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.dish-row-actions .el-button {
+  min-width: 72px;
+  height: 36px;
+  margin-left: 0;
+  padding: 0 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.sort-badge {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  display: inline-grid;
+  place-items: center;
+  color: #58709a;
+  background: #eff3f9;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.category-name {
+  color: #26344e;
+  font-size: 14px;
+}
+
+.category-icon-cell {
+  width: 42px;
+  height: 42px;
+  border: 1px solid #e5e9f0;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  color: #9aa3b2;
+  background: #f7f9fc;
+  font-size: 10px;
+}
+
+.category-icon-cell .el-image {
+  width: 26px;
+  height: 26px;
+}
+
+.category-icon-selector {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.category-icon-selector .el-button {
+  --el-button-bg-color: #f7f8fa;
+  --el-button-border-color: #dfe4eb;
+  --el-button-text-color: #5f6b7d;
+  --el-button-hover-bg-color: #fff7f3;
+  --el-button-hover-border-color: #f2a185;
+  --el-button-hover-text-color: #d95b34;
+  --el-button-active-bg-color: #fff0e9;
+  --el-button-active-border-color: #f26b3f;
+  --el-button-active-text-color: #c6532d;
+  height: 36px;
+  border-radius: 9px;
+  font-weight: 650;
+}
+
+.category-icon-preview {
+  width: 64px;
+  height: 64px;
+  border: 1px solid #e0e5ec;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  color: #7d8899;
+  background: #f5f7fa;
+  font-size: 11px;
+}
+
+.category-icon-preview .el-image {
+  width: 40px;
+  height: 40px;
+}
+
+.icon-library-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 18px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #edf0f4;
+}
+
+.icon-library-tabs button {
+  min-width: 170px;
+  padding: 10px 13px;
+  border: 1px solid #e2e7ef;
+  border-radius: 10px;
+  display: grid;
+  gap: 3px;
+  color: #596579;
+  background: #fff;
+  cursor: pointer;
+  text-align: left;
+}
+
+.icon-library-tabs button.active {
+  border-color: #f26b3f;
+  color: #d95b34;
+  background: #fff7f3;
+}
+
+.icon-library-tabs strong {
+  font-size: 13px;
+}
+
+.icon-library-tabs small {
+  color: #9aa4b4;
+  font-size: 10px;
+}
+
+.category-icon-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.category-icon-option {
+  min-height: 94px;
+  padding: 12px 7px 9px;
+  border: 1px solid #e7ebf1;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  gap: 5px;
+  color: #5e697b;
+  background: #fff;
+  cursor: pointer;
+}
+
+.category-icon-option:hover,
+.category-icon-option.active {
+  border-color: #f26b3f;
+  color: #d95b34;
+  background: #fff8f5;
+}
+
+.category-icon-option-image {
+  width: 30px;
+  height: 30px;
+}
+
+.category-icon-option strong {
+  font-size: 11px;
+}
+
+.category-icon-option span {
+  color: #a5adba;
+  font-size: 9px;
+}
+
+@media (max-width: 600px) {
+  .category-icon-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+

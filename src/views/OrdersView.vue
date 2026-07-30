@@ -2,6 +2,7 @@
 import { Refresh } from '@element-plus/icons-vue'
 import type { Order, OrderStatus } from '../types'
 import type { StatusMeta } from '../admin-types'
+import AppButton from '../components/AppButton.vue'
 
 defineProps<{
   orders: Order[]
@@ -37,7 +38,7 @@ function orderItemsText(order: Order) {
 </script>
 
 <template>
-  <section class="module-view">
+  <section class="module-view orders-view">
     <el-card>
       <template #header>
         <div class="panel-title">
@@ -53,7 +54,7 @@ function orderItemsText(order: Order) {
             >
               <el-option v-for="(meta, status) in statusMeta" :key="status" :label="meta.label" :value="status" />
             </el-select>
-            <el-button :icon="Refresh" :loading="loading" @click="$emit('refresh')">刷新订单</el-button>
+            <AppButton :icon="Refresh" :loading="loading" @click="$emit('refresh')">刷新订单</AppButton>
           </div>
         </div>
       </template>
@@ -98,12 +99,12 @@ function orderItemsText(order: Order) {
         </el-table-column>
         <el-table-column label="操作" width="200" fixed="right">
           <template #default="{ row }">
-            <el-button v-if="statusMeta[row.status as OrderStatus].next" type="primary" size="small" @click="$emit('advance', row)">
+            <AppButton v-if="statusMeta[row.status as OrderStatus].next" type="primary" size="small" @click="$emit('advance', row)">
               {{ statusMeta[row.status as OrderStatus].action }}
-            </el-button>
-            <el-button v-if="!['COMPLETED', 'CANCELLED', 'REFUNDED'].includes(row.status)" type="danger" plain size="small" @click="$emit('cancel', row)">
+            </AppButton>
+            <AppButton v-if="!['COMPLETED', 'CANCELLED', 'REFUNDED'].includes(row.status)" type="danger" plain size="small" @click="$emit('cancel', row)">
               取消
-            </el-button>
+            </AppButton>
           </template>
         </el-table-column>
       </el-table>

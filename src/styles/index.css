@@ -1,0 +1,22 @@
+/* Admin styles entry — import order matches legacy style.css cascade. */
+@import './base.css';
+@import './layout.css';
+@import './dashboard.css';
+@import './orders.css';
+@import './dishes.css';
+@import './components/account-dropdown.css';
+@import './profile.css';
+@import './theme-dark.css';
+@import './dishes-extras.css';
+@import './gallery.css';
+@import './settings.css';
+@import './responsive.css';
+@import './dishes-workspace.css';
+@import './dishes-dark.css';
+@import './gallery-dark.css';
+@import './settings-dark.css';
+@import './login.css';
+@import './components/buttons.css';
+@import './components/messages.css';
+@import './users.css';
+@import './theme-ripple.css';

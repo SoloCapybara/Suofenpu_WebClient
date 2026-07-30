@@ -1,0 +1,182 @@
+/* === components/account-dropdown.css: Account dropdown (lines 1465-1645) === */
+/* Account dropdown -------------------------------------------------------- */
+.account-dropdown-popper.el-popper {
+  width: 270px;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid #d8e0ec;
+  border-radius: 14px;
+  background: #ffffff;
+  box-shadow: 0 18px 40px rgba(32, 54, 96, 0.14);
+}
+
+.account-dropdown-popper.el-popper .el-popper__arrow::before {
+  border-color: #d8e0ec;
+  background: #ffffff;
+}
+
+.account-dropdown-head {
+  padding: 17px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid #e8eef7;
+  background: linear-gradient(145deg, #f7faff, #ffffff);
+}
+
+.account-dropdown-avatar {
+  width: 40px;
+  height: 40px;
+  flex: 0 0 auto;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  background: linear-gradient(135deg, #2f73ff, #7dcbff);
+  box-shadow: 0 8px 18px rgba(47, 115, 255, 0.22);
+  font-weight: 800;
+}
+
+.account-dropdown-head strong,
+.account-dropdown-head span {
+  display: block;
+}
+
+.account-dropdown-head strong {
+  color: #18243c;
+  font-size: 14px;
+}
+
+.account-dropdown-head span {
+  margin-top: 3px;
+  color: #748099;
+  font-size: 11px;
+}
+
+.account-dropdown-menu.el-dropdown-menu {
+  padding: 7px;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
+.account-dropdown-menu .el-dropdown-menu__item {
+  min-height: 56px;
+  padding: 8px 10px;
+  border-radius: 9px;
+  gap: 10px;
+  color: #536179;
+  line-height: 1.2;
+}
+
+.account-dropdown-menu .el-dropdown-menu__item:hover,
+.account-dropdown-menu .el-dropdown-menu__item:focus {
+  color: #2468e8;
+  background: #f0f5ff;
+}
+
+.account-dropdown-menu .el-dropdown-menu__item .el-icon {
+  width: 31px;
+  height: 31px;
+  margin: 0;
+  border-radius: 9px;
+  color: #2f73ff;
+  background: #e8f1ff;
+}
+
+.account-dropdown-menu .el-dropdown-menu__item > span,
+.account-dropdown-menu .el-dropdown-menu__item strong,
+.account-dropdown-menu .el-dropdown-menu__item small {
+  display: block;
+}
+
+.account-dropdown-menu .el-dropdown-menu__item strong {
+  color: inherit;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.account-dropdown-menu .el-dropdown-menu__item small {
+  margin-top: 4px;
+  color: #8a96aa;
+  font-size: 10px;
+}
+
+.account-dropdown-menu .el-dropdown-menu__item--divided {
+  margin-top: 7px;
+  border-top: 1px solid #e8eef7;
+}
+
+.account-dropdown-menu .el-dropdown-menu__item--divided::before {
+  background: transparent;
+}
+
+.account-dropdown-menu .el-dropdown-menu__item--divided .el-icon {
+  color: #e25555;
+  background: rgba(226, 85, 85, 0.1);
+}
+
+.account-dropdown-menu .el-dropdown-menu__item--divided:hover,
+.account-dropdown-menu .el-dropdown-menu__item--divided:focus {
+  color: #d94848;
+  background: #fff5f5;
+}
+
+html.dark .account-dropdown-popper.el-popper {
+  border-color: #374151;
+  background: #1d232d;
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.32);
+}
+
+html.dark .account-dropdown-popper.el-popper .el-popper__arrow::before {
+  border-color: #374151;
+  background: #1d232d;
+}
+
+html.dark .account-dropdown-head {
+  border-bottom-color: #303845;
+  background: linear-gradient(145deg, #222a36, #1d232d);
+}
+
+html.dark .account-dropdown-head strong {
+  color: #edf2fa;
+}
+
+html.dark .account-dropdown-head span {
+  color: #8d9aaf;
+}
+
+html.dark .account-dropdown-menu .el-dropdown-menu__item {
+  color: #bdc7d6;
+}
+
+html.dark .account-dropdown-menu .el-dropdown-menu__item:hover,
+html.dark .account-dropdown-menu .el-dropdown-menu__item:focus {
+  color: #e9eef8;
+  background: #293341;
+}
+
+html.dark .account-dropdown-menu .el-dropdown-menu__item .el-icon {
+  color: #8fb6ff;
+  background: #263752;
+}
+
+html.dark .account-dropdown-menu .el-dropdown-menu__item small {
+  color: #7f8b9e;
+}
+
+html.dark .account-dropdown-menu .el-dropdown-menu__item--divided {
+  border-top-color: #303845;
+}
+
+html.dark .account-dropdown-menu .el-dropdown-menu__item--divided .el-icon {
+  color: #ef9292;
+  background: rgba(220, 76, 76, 0.12);
+}
+
+html.dark .account-dropdown-menu .el-dropdown-menu__item--divided:hover,
+html.dark .account-dropdown-menu .el-dropdown-menu__item--divided:focus {
+  color: #ffb0b0;
+  background: rgba(220, 76, 76, 0.1);
+}
+

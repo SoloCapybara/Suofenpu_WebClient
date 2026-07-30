@@ -111,3 +111,21 @@ export interface Order {
   createdAt: string
   items: OrderItem[]
 }
+
+export interface EmployeeAccount {
+  id: number
+  username: string
+  displayName: string
+  role: 'OWNER' | 'MANAGER' | 'STAFF'
+  enabled: boolean
+  createdAt: string
+}
+
+export interface CustomerAccount {
+  id: number
+  nickname?: string
+  phone?: string
+  avatarUrl?: string
+  status: 'ACTIVE' | 'DISABLED'
+  createdAt: string
+}

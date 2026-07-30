@@ -1,0 +1,11 @@
+/* === settings-dark.css: Settings dark mode (lines 4093-4102) === */
+/* Settings dark mode */
+html.dark .settings-form .el-form-item__label,
+html.dark .panel-title strong {
+  color: var(--text);
+}
+
+html.dark .el-card__header {
+  border-color: var(--line);
+}
+
