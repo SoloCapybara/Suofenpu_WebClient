@@ -116,6 +116,7 @@ export interface EmployeeAccount {
   id: number
   username: string
   displayName: string
+  avatarUrl?: string | null
   role: 'OWNER' | 'MANAGER' | 'STAFF'
   enabled: boolean
   createdAt: string

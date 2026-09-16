@@ -1,6 +1,7 @@
-import { defineComponent } from 'vue'
+import { defineComponent, nextTick } from 'vue'
 import { createRouter, createWebHashHistory, type RouteRecordRaw } from 'vue-router'
 import { getAdminToken } from '../auth'
+import { finishRouteProgress, startRouteProgress } from '../utils/route-progress'
 import LoginView from '../views/LoginView.vue'
 
 const RouteHost = defineComponent({
@@ -32,6 +33,12 @@ export const routes = [
     name: 'dishes',
     component: RouteHost,
     meta: { section: 'dishes', navKey: 'goods', title: '商品管理' },
+  },
+  {
+    path: '/categories',
+    name: 'categories',
+    component: RouteHost,
+    meta: { section: 'categories', navKey: 'categories', title: '分类管理' },
   },
   {
     path: '/gallery',
@@ -112,10 +119,21 @@ export const router = createRouter({
   routes,
 })
 
-router.beforeEach((to) => {
+router.beforeEach((to, from) => {
+  if (to.path !== from.path) startRouteProgress()
+
   const loggedIn = Boolean(getAdminToken())
   if (to.meta.public && loggedIn) return { path: '/' }
   if (!to.meta.public && !loggedIn) return { path: '/login', query: { redirect: to.fullPath } }
   document.title = `${String(to.meta.title || '管理后台')} - 粉店经营后台`
   return true
+})
+
+router.afterEach(async () => {
+  await nextTick()
+  requestAnimationFrame(() => finishRouteProgress())
+})
+
+router.onError(() => {
+  finishRouteProgress()
 })

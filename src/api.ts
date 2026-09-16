@@ -44,8 +44,62 @@ export async function updateAdminProfile(displayName: string) {
   return response.data
 }
 
+export async function uploadAdminAvatar(file: File) {
+  const form = new FormData()
+  form.append('file', file)
+  const response = await http.post<AdminProfile>('/admin-auth/me/avatar', form)
+  return response.data
+}
+
+export async function removeAdminAvatar() {
+  const response = await http.delete<AdminProfile>('/admin-auth/me/avatar')
+  return response.data
+}
+
 export async function changeAdminPassword(currentPassword: string, newPassword: string) {
   await http.post('/admin-auth/change-password', { currentPassword, newPassword })
+}
+
+export interface StoreSettings {
+  storeName: string
+  businessHours: string
+  deliveryRange: string
+  notice: string
+  storeOpen: boolean
+}
+
+export async function getStoreSettings() {
+  return (await http.get<StoreSettings>('/admin/store-settings')).data
+}
+
+export async function updateStoreOpen(storeOpen: boolean) {
+  return (await http.patch<StoreSettings>('/admin/store-settings/store-open', { storeOpen })).data
+}
+
+export async function updateStoreSettings(payload: {
+  storeName: string
+  businessHours: string
+  deliveryRange: string
+  notice: string
+}) {
+  return (await http.patch<StoreSettings>('/admin/store-settings', payload)).data
+}
+
+export interface HomeBanner {
+  id?: number
+  imageUrl: string
+  title: string
+  highlight: string
+  badge: string
+  enabled: boolean
+}
+
+export async function getHomeBanners() {
+  return (await http.get<HomeBanner[]>('/admin/home-banners')).data
+}
+
+export async function saveHomeBanners(banners: HomeBanner[]) {
+  return (await http.post<HomeBanner[]>('/admin/home-banners', { banners })).data
 }
 
 export async function listEmployeeAccounts() {

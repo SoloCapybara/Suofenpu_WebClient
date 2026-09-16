@@ -2,6 +2,7 @@ export interface AdminProfile {
   id: number
   username: string
   displayName: string
+  avatarUrl?: string | null
   role: string
   createdAt?: string
 }

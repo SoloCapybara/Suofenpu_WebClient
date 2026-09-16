@@ -1,11 +1,97 @@
-/* === settings-dark.css: Settings dark mode (lines 4093-4102) === */
-/* Settings dark mode */
+/* === settings-dark.css: Settings dark mode === */
 html.dark .settings-form .el-form-item__label,
 html.dark .panel-title strong {
   color: var(--text);
 }
 
-html.dark .el-card__header {
+html.dark .settings-workbench {
+  border-color: var(--line);
+  background: var(--panel);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.2);
+}
+
+html.dark .settings-banner-item {
+  background: #202630;
   border-color: var(--line);
 }
 
+html.dark .settings-banner-intro strong,
+html.dark .settings-banner-toolbar strong {
+  color: var(--text);
+}
+
+html.dark .settings-banner-intro p {
+  color: var(--muted);
+}
+
+html.dark .settings-page .dish-image-selector {
+  border-color: var(--line);
+  background: #1d232d;
+}
+
+html.dark .settings-page .dish-image-preview-wrap {
+  border-color: var(--line);
+  background: #171c24;
+}
+
+html.dark .settings-page .dish-image-preview-wrap.empty {
+  border-color: #3a4352;
+}
+
+html.dark .settings-page .dish-image-empty {
+  color: var(--muted);
+}
+
+html.dark .settings-page .dish-image-empty .el-icon {
+  color: #7ea5e8;
+}
+
+html.dark .settings-page .gallery-image-error {
+  color: var(--muted);
+  background: #171c24;
+}
+
+html.dark .settings-page .image-picker-card {
+  border-color: var(--line);
+  background: #1b202a;
+}
+
+html.dark .settings-page .image-picker-card strong {
+  color: var(--text);
+}
+
+html.dark .settings-page .image-picker-card span {
+  color: var(--muted);
+}
+
+html.dark .settings-page .image-picker-card:hover,
+html.dark .settings-page .image-picker-card.active {
+  border-color: #5d8fd8;
+  background: #232b38;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.28);
+}
+
+html.dark .settings-image-picker-dialog .image-picker-thumb,
+html.dark .settings-image-picker-dialog .gallery-image-error {
+  background: #171c24;
+}
+
+html.dark .settings-image-picker-dialog .image-picker-card {
+  border-color: var(--line);
+  background: #1b202a;
+}
+
+html.dark .settings-image-picker-dialog .image-picker-card strong {
+  color: var(--text);
+}
+
+html.dark .settings-image-picker-dialog .image-picker-card span {
+  color: var(--muted);
+}
+
+html.dark .settings-image-picker-dialog .image-picker-card:hover,
+html.dark .settings-image-picker-dialog .image-picker-card.active {
+  border-color: #5d8fd8;
+  background: #232b38;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.28);
+}

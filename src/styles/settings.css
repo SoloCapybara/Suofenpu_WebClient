@@ -1,6 +1,55 @@
 /* === settings.css: Settings form === */
+.settings-page {
+  min-height: 0;
+}
+
+.settings-workbench {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-panel);
+  background: var(--panel);
+  box-shadow: 0 8px 24px rgba(31, 38, 53, 0.06);
+}
+
+.settings-tabs {
+  flex: 0 0 auto;
+}
+
+.settings-panel {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  padding: 22px 24px 28px;
+}
+
+.settings-panel-section {
+  max-width: 860px;
+}
+
 .settings-form {
   max-width: 720px;
+}
+
+.business-hours-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.business-hours-row .el-select {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.business-hours-separator {
+  flex: 0 0 auto;
+  color: var(--muted);
+  font-size: 14px;
 }
 
 .coming-soon-card {
@@ -17,7 +66,7 @@
 }
 
 .coming-soon strong {
-  color: #1c2942;
+  color: var(--text);
   font-size: 24px;
   font-weight: 900;
 }
@@ -25,4 +74,117 @@
 .coming-soon span {
   color: var(--muted);
   font-size: 14px;
+}
+
+.settings-banner-panel {
+  max-width: none;
+}
+
+.settings-banner-intro {
+  margin-bottom: 18px;
+}
+
+.settings-banner-intro strong {
+  color: var(--text);
+  font-size: 16px;
+}
+
+.settings-banner-intro p {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.settings-banner-list {
+  display: grid;
+  gap: 16px;
+}
+
+.settings-banner-item {
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--el-fill-color-extra-light);
+}
+
+.settings-banner-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.settings-banner-toolbar strong {
+  color: var(--text);
+  font-size: 15px;
+}
+
+.settings-banner-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.settings-banner-body {
+  display: grid;
+  grid-template-columns: minmax(240px, 320px) minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.settings-banner-image {
+  margin: 0;
+}
+
+.settings-banner-fields {
+  min-width: 0;
+}
+
+.settings-page .dish-image-selector {
+  border-color: var(--line);
+  background: var(--el-fill-color-light);
+}
+
+.settings-page .dish-image-preview-wrap {
+  border-color: var(--line);
+  background: var(--el-fill-color);
+}
+
+.settings-page .dish-image-empty {
+  color: var(--muted);
+}
+
+.settings-page .dish-image-actions small {
+  color: var(--muted);
+}
+
+.settings-page .image-picker-card {
+  border-color: var(--line);
+  background: var(--panel);
+}
+
+.settings-page .image-picker-card strong {
+  color: var(--text);
+}
+
+.settings-page .image-picker-card span {
+  color: var(--muted);
+}
+
+.settings-page .image-picker-card:hover,
+.settings-page .image-picker-card.active {
+  border-color: var(--blue);
+  box-shadow: 0 10px 22px rgba(47, 115, 255, 0.14);
+}
+
+@media (max-width: 960px) {
+  .settings-banner-body {
+    grid-template-columns: 1fr;
+  }
+
+  .settings-panel {
+    padding: 18px 16px 24px;
+  }
 }

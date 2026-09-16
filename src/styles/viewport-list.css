@@ -1,0 +1,48 @@
+/* Viewport-filling list pages: header stays fixed, table body scrolls to bottom. */
+.viewport-page {
+  flex: 1 1 auto;
+  min-height: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.viewport-page > .page-heading,
+.viewport-page > .user-stat-row,
+.viewport-page > .product-summary,
+.viewport-page > .dishes-stat-row {
+  flex: 0 0 auto;
+}
+
+.content-scroll-page {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  align-content: start;
+}
+
+/* Multi-section pages: grow with content, scroll the main panel instead of a short inner box. */
+.flow-scroll-page {
+  flex: 0 0 auto;
+  width: 100%;
+  height: auto;
+  min-height: auto;
+  overflow: visible;
+  display: grid;
+  gap: 16px;
+  align-content: start;
+  padding-bottom: 24px;
+}
+
+.admin-table-region {
+  flex: 0 0 auto;
+  min-height: var(--table-region-min-height, auto);
+  overflow: visible;
+}
+
+.admin-table-region > .el-table {
+  width: 100%;
+}

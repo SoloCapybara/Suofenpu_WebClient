@@ -20,11 +20,12 @@
   color: #eef3fb;
   border-color: #53627a;
   background: #2d3643;
-  transform: translateY(-1px);
   box-shadow: 0 7px 16px rgba(0, 0, 0, .13), 0 1px 0 rgba(255, 255, 255, .04) inset;
 }
 
-.app-button.el-button:active { transform: translateY(0); box-shadow: none; }
+.app-button.el-button:active {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1), 0 1px 0 rgba(255, 255, 255, 0.03) inset;
+}
 
 .app-button--primary.app-button--brand.el-button {
   color: #fff;

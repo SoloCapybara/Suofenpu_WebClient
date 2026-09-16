@@ -10,7 +10,7 @@ function supportsViewTransition() {
 }
 
 function readToggleOrigin() {
-  const el = document.querySelector('.theme-toggle-anchor') as HTMLElement | null
+  const el = document.querySelector('.theme-toggle') as HTMLElement | null
   if (el) {
     const rect = el.getBoundingClientRect()
     if (rect.width > 0 || rect.height > 0) {

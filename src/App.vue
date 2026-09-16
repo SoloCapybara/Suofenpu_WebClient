@@ -7,6 +7,7 @@ import {
   Bowl,
   Box,
   Coin,
+  CollectionTag,
   Goods,
   House,
   Picture,
@@ -31,7 +32,13 @@ import {
   updateOrderStatus,
   logoutAdmin,
   getCurrentAdmin,
+  getStoreSettings,
+  updateStoreOpen,
+  updateStoreSettings,
+  getHomeBanners,
+  saveHomeBanners,
 } from './api'
+import type { HomeBanner } from './api'
 import { clearAdminSession, getAdminToken, getStoredAdmin, updateStoredAdmin } from './auth'
 import type { GalleryResponse, Dish, DishCategory, DishCategoryPayload, DishPayload, ImageAsset, Order, OrderStatus } from './types'
 import type {
@@ -44,9 +51,11 @@ import type {
   TopOrderItem,
 } from './admin-types'
 import AdminLayout from './components/AdminLayout.vue'
+import RouteProgressBar from './components/RouteProgressBar.vue'
 import { AppMessage } from './components/AppMessage'
 import DishEditorDialog from './components/DishEditorDialog.vue'
 import DashboardView from './views/DashboardView.vue'
+import CategoriesView from './views/CategoriesView.vue'
 import DishesView from './views/DishesView.vue'
 import GalleryView from './views/GalleryView.vue'
 import NotFoundView from './views/NotFoundView.vue'
@@ -55,6 +64,7 @@ import SettingsView from './views/SettingsView.vue'
 import ProfileView from './views/ProfileView.vue'
 import UserManagementView from './views/UserManagementView.vue'
 import { runThemeTransition } from './utils/theme-transition'
+import { resolveGlobalSearchTarget } from './utils/global-search'
 
 const route = useRoute()
 const router = useRouter()
@@ -84,6 +94,7 @@ async function toggleDarkMode() {
   })
 }
 
+const globalSearch = ref('')
 const orderStatusFilter = ref<OrderStatus | ''>('')
 const orders = ref<Order[]>([])
 const dishes = ref<Dish[]>([])
@@ -118,22 +129,13 @@ const settings = reactive({
   deliveryRange: '门店 3 公里内',
   notice: '满 38 减 5，预计 25 分钟送达。',
 })
-
-const sectionTitles: Record<Section, string> = {
-  dashboard: '今日经营',
-  orders: '订单管理',
-  dishes: '菜品管理',
-  gallery: '图库管理',
-  settings: '系统设置',
-  users: '用户管理',
-  profile: '个人中心',
-  notFound: '404',
-}
+const homeBanners = ref<HomeBanner[]>([])
 
 const navItems = [
   { key: 'home', section: 'dashboard', path: '/', label: '今日经营', icon: House },
   { key: 'orders', section: 'orders', path: '/orders', label: '订单管理', icon: Tickets },
   { key: 'goods', section: 'dishes', path: '/dishes', label: '商品管理', icon: Goods },
+  { key: 'categories', section: 'categories', path: '/categories', label: '分类管理', icon: CollectionTag },
   { key: 'gallery', section: 'gallery', path: '/gallery', label: '图库管理', icon: Picture },
   { key: 'users', section: 'users', path: '/users', label: '用户管理', icon: UserFilled },
   { key: 'settings', section: 'settings', path: '/settings', label: '系统设置', icon: Setting },
@@ -259,10 +261,35 @@ async function refreshImageAssets() {
   }
 }
 
+async function loadStoreSettings() {
+  if (!getAdminToken()) return
+  try {
+    const data = await getStoreSettings()
+    storeOpen.value = data.storeOpen
+    Object.assign(settings, {
+      storeName: data.storeName,
+      businessHours: data.businessHours,
+      deliveryRange: data.deliveryRange,
+      notice: data.notice,
+    })
+  } catch (error) {
+    AppMessage.error(error instanceof Error ? error.message : '门店设置加载失败')
+  }
+}
+
+async function loadHomeBanners() {
+  if (!getAdminToken()) return
+  try {
+    homeBanners.value = await getHomeBanners()
+  } catch (error) {
+    AppMessage.error(error instanceof Error ? error.message : '轮播图加载失败')
+  }
+}
+
 async function refreshAll() {
   loading.value = true
   try {
-    await Promise.all([refreshOrders(), refreshDishes(), refreshImageAssets()])
+    await Promise.all([refreshOrders(), refreshDishes(), refreshImageAssets(), loadStoreSettings(), loadHomeBanners()])
   } finally {
     loading.value = false
   }
@@ -479,14 +506,83 @@ function replaceDish(updated: Dish) {
   if (index >= 0) dishes.value.splice(index, 1, updated)
 }
 
-function saveSettings() {
-  AppMessage.success('门店设置已保存到当前页面状态')
+async function saveSettings() {
+  const invalidBanner = homeBanners.value.find((banner) => banner.enabled && !banner.imageUrl.trim())
+  if (invalidBanner) {
+    AppMessage.warning('启用的轮播图必须选择图片')
+    return
+  }
+  try {
+    const [data, banners] = await Promise.all([
+      updateStoreSettings({
+        storeName: settings.storeName.trim(),
+        businessHours: settings.businessHours.trim(),
+        deliveryRange: settings.deliveryRange.trim(),
+        notice: settings.notice.trim(),
+      }),
+      saveHomeBanners(
+        homeBanners.value.map((banner) => ({
+          id: banner.id,
+          imageUrl: banner.imageUrl.trim(),
+          title: banner.title.trim(),
+          highlight: banner.highlight.trim(),
+          badge: banner.badge.trim(),
+          enabled: banner.enabled,
+        })),
+      ),
+    ])
+    Object.assign(settings, data)
+    homeBanners.value = banners
+    storeOpen.value = data.storeOpen
+    AppMessage.success('设置已保存')
+  } catch (error) {
+    AppMessage.error(error instanceof Error ? error.message : '设置保存失败')
+  }
 }
 
 function selectNav(key: string) {
   const item = navItems.find((nav) => nav.key === key)
   if (!item) return
   router.push(item.path)
+}
+
+async function handleStoreOpenChange(value: boolean) {
+  if (!getAdminToken() || value === storeOpen.value) return
+  const previous = storeOpen.value
+  storeOpen.value = value
+  try {
+    await updateStoreOpen(value)
+    AppMessage.success(value ? '门店已开始营业' : '门店已打烊')
+  } catch (error) {
+    storeOpen.value = previous
+    AppMessage.error(error instanceof Error ? error.message : '营业状态更新失败')
+  }
+}
+
+watch(
+  () => route.query.q,
+  (value) => {
+    globalSearch.value = String(value || '')
+  },
+  { immediate: true },
+)
+
+function runGlobalSearch() {
+  const keyword = globalSearch.value.trim()
+  if (!keyword) return
+  const target = resolveGlobalSearchTarget(keyword, orders.value, dishes.value)
+  if (!target) {
+    AppMessage.warning('未找到匹配的订单或商品')
+    return
+  }
+  router.push({ path: target, query: { q: keyword } })
+}
+
+function clearGlobalSearch() {
+  globalSearch.value = ''
+  if (route.query.q) {
+    router.replace({ path: route.path, query: {} })
+  }
 }
 
 async function handleLogout() {
@@ -529,19 +625,26 @@ onBeforeUnmount(() => window.removeEventListener('admin-auth-changed', syncAdmin
 
 <template>
   <el-config-provider :locale="zhCn">
+  <RouteProgressBar />
   <router-view v-if="route.meta.public" />
   <template v-else>
   <AdminLayout
     v-loading="loading"
-    v-model:store-open="storeOpen"
+    :store-open="storeOpen"
+    @update:store-open="handleStoreOpenChange"
+    v-model:global-search="globalSearch"
     :dark-mode="darkMode"
     :active-nav="activeNav"
     :nav-items="navItems"
     :admin-name="currentAdmin?.displayName || '管理员'"
+    :admin-avatar-url="currentAdmin?.avatarUrl"
     :admin-role="currentAdmin?.role || 'OWNER'"
+    :refreshing="loading"
     @select-nav="selectNav"
     @toggle-dark-mode="toggleDarkMode"
     @refresh="refreshAll"
+    @global-search="runGlobalSearch"
+    @clear-global-search="clearGlobalSearch"
     @logout="handleLogout"
     @profile="router.push('/profile')"
   >
@@ -585,6 +688,14 @@ onBeforeUnmount(() => window.removeEventListener('admin-auth-changed', syncAdmin
       @edit="openEditDish"
       @toggle="toggleDish"
       @remove="removeDish"
+    />
+
+    <CategoriesView
+      v-else-if="activeSection === 'categories'"
+      :categories="dishCategories"
+      :dishes="dishes"
+      :loading="dishesLoading"
+      @refresh="refreshDishes"
       @create-category="createCategory"
       @update-category="updateCategory"
       @delete-category="removeCategory"
@@ -592,9 +703,11 @@ onBeforeUnmount(() => window.removeEventListener('admin-auth-changed', syncAdmin
 
     <SettingsView
       v-else-if="activeSection === 'settings'"
-      :title="sectionTitles[activeSection]"
       :settings="settings"
+      :banners="homeBanners"
+      :image-assets="gallery.images"
       @save="saveSettings"
+      @update:banners="homeBanners = $event"
     />
 
     <ProfileView

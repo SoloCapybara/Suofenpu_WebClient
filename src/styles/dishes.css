@@ -1,8 +1,13 @@
 /* === dishes.css: Dishes / category tables (core) (lines 1129-1464) === */
-.dishes-view {
+.dishes-view,
+.categories-view {
   width: 100%;
   max-width: none;
-  gap: 16px;
+}
+
+.dishes-stat-row,
+.categories-stat-row {
+  flex: 0 0 auto;
 }
 
 .dishes-heading {
@@ -144,28 +149,11 @@
   background: #fff3dc;
 }
 
-.dishes-table {
-  --el-table-header-bg-color: #f7f9fd;
-  --el-table-row-hover-bg-color: #f5f9ff;
-  --el-table-border-color: #edf1f7;
-}
-
-.dishes-table th.el-table__cell {
-  height: 46px;
-  color: #6b7890;
-  font-size: 12px;
-  font-weight: 800;
-}
-
-.dishes-table td.el-table__cell {
-  padding: 11px 0;
-}
-
 .dish-row-actions {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 10px;
+  justify-content: flex-start;
+  gap: 13px;
 }
 
 .dish-row-actions .el-button {

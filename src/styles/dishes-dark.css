@@ -64,11 +64,11 @@ html.dark .product-category-tabs button span {
 html.dark .product-category-tabs button:hover,
 html.dark .product-category-tabs button.active,
 html.dark .product-category-tabs button.active span {
-  color: #ff8a64;
+  color: #8eb4fa;
 }
 
 html.dark .product-category-tabs button.active span {
-  background: #3b2925;
+  background: rgba(62, 119, 228, 0.16);
 }
 
 html.dark .product-toolbar {
@@ -81,18 +81,14 @@ html.dark .product-toolbar .el-select__wrapper {
   box-shadow: 0 0 0 1px var(--el-border-color) inset;
 }
 
-html.dark .product-workbench .dishes-table {
+html.dark .admin-data-table {
   --el-table-bg-color: var(--panel);
   --el-table-tr-bg-color: var(--panel);
-  --el-table-header-bg-color: #202630;
-  --el-table-row-hover-bg-color: #242d3a;
+  --el-table-header-bg-color: rgba(128, 142, 163, 0.08);
+  --el-table-row-hover-bg-color: rgba(80, 117, 178, 0.12);
   --el-table-border-color: var(--line);
   --el-table-text-color: #dce3ed;
   --el-table-header-text-color: #aeb9ca;
-}
-
-html.dark .product-workbench .dishes-table th.el-table__cell {
-  color: #aeb9ca;
 }
 
 html.dark .dish-thumb {
@@ -105,10 +101,6 @@ html.dark .category-code,
 html.dark .sort-badge {
   color: #c2ccda;
   background: #29313d;
-}
-
-html.dark .dish-edit-link {
-  color: #aeb9ca !important;
 }
 
 html.dark .quiet-icon-button.app-button.el-button {

@@ -140,14 +140,6 @@
   margin: 0 18px 12px;
 }
 
-.product-toolbar {
-  padding: 2px 18px 16px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  border-bottom: 1px solid #edf1f7;
-}
-
 .product-search {
   width: min(360px, 100%);
 }
@@ -160,7 +152,13 @@
   margin-left: auto;
   color: #8c98aa;
   font-size: 12px;
+  line-height: 1;
   white-space: nowrap;
+}
+
+.product-toolbar .el-input,
+.product-toolbar .el-select {
+  margin: 0;
 }
 
 .category-collapse {

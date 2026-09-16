@@ -1,12 +1,13 @@
 import type { Component } from 'vue'
 import type { OrderStatus } from './types'
 
-export type Section = 'dashboard' | 'orders' | 'dishes' | 'gallery' | 'users' | 'settings' | 'profile' | 'notFound'
+export type Section = 'dashboard' | 'orders' | 'dishes' | 'categories' | 'gallery' | 'users' | 'settings' | 'profile' | 'notFound'
 
 export type NavKey =
   | 'home'
   | 'orders'
   | 'goods'
+  | 'categories'
   | 'gallery'
   | 'storeData'
   | 'profit'

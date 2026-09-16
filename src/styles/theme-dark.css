@@ -96,56 +96,41 @@ html.dark .topbar {
   background: rgba(25, 30, 39, 0.92);
 }
 
-html.dark .top-search .el-input__wrapper {
+html.dark .top-search-trigger {
+  color: #9aa8bc;
   background: #202630;
   box-shadow: 0 0 0 1px #3a4352 inset;
 }
 
-html.dark .top-search .el-input__wrapper:hover,
-html.dark .top-search .el-input__wrapper.is-focus {
+html.dark .top-search-trigger:hover {
+  color: #dce3ed;
   background: #242b36;
   box-shadow: 0 0 0 1px #5875a5 inset;
 }
 
-html.dark .top-toolbar-group {
-  border-color: #3a4352;
+html.dark .top-search-trigger__text.filled {
+  color: #eef3fb;
+}
+
+html.dark .search-spotlight__backdrop {
+  background: rgba(8, 12, 20, 0.58);
+}
+
+html.dark .search-spotlight__input .el-input__wrapper {
   background: #202630;
+  box-shadow:
+    0 0 0 1px rgba(145, 183, 250, 0.22) inset,
+    0 18px 48px rgba(0, 0, 0, 0.35);
 }
 
-html.dark .top-toolbar-btn.app-button.el-button,
-html.dark .top-toolbar-btn.app-button.el-button.is-circle {
-  color: #aeb9ca;
+html.dark .search-spotlight__input .el-input__wrapper.is-focus {
+  box-shadow:
+    0 0 0 2px rgba(145, 183, 250, 0.32) inset,
+    0 22px 56px rgba(0, 0, 0, 0.42);
 }
 
-html.dark .top-toolbar-btn.app-button.el-button:hover,
-html.dark .top-toolbar-btn.app-button.el-button:focus-visible {
-  color: #8bb4ff;
-  border-color: #405b86;
-  background: #29364b;
-  box-shadow: none;
-}
-
-html.dark .store-status-chip {
-  color: #9aa8bc;
-}
-
-html.dark .store-status-chip:hover {
-  border-color: #405b86;
-  background: #29364b;
-}
-
-html.dark .store-status-chip.open {
-  color: #72d7a5;
-}
-
-html.dark .store-status-dot {
-  background: #667286;
-  box-shadow: 0 0 0 3px rgba(102, 114, 134, 0.18);
-}
-
-html.dark .store-status-chip.open .store-status-dot {
-  background: #20c76b;
-  box-shadow: 0 0 0 3px rgba(32, 199, 107, 0.16);
+html.dark .search-spotlight__hint {
+  color: rgba(220, 227, 237, 0.82);
 }
 
 html.dark .admin-user-trigger {
@@ -154,14 +139,15 @@ html.dark .admin-user-trigger {
 }
 
 html.dark .admin-user-trigger:hover,
-html.dark .admin-user-trigger:focus-visible {
+html.dark .admin-user-trigger:focus-visible,
+html.dark .admin-user-trigger--open {
   border-color: #5875a5;
   background: #29364b;
-  box-shadow: none;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.22);
 }
 
 html.dark :is(.el-card, .el-dialog, .el-drawer, .el-popover, .el-dropdown__popper, .el-select__popper),
-html.dark :is(.stat-card, .anomaly-card, .chart-card, .ranking-card, .insight-card, .store-card, .dishes-panel, .product-workbench, .product-summary, .gallery-card, .gallery-folder-card, .settings-card, .category-collapse) {
+html.dark :is(.stat-card, .anomaly-card, .chart-card, .ranking-card, .insight-card, .store-card, .dishes-panel, .product-workbench, .product-summary, .gallery-card, .gallery-folder-card, .gallery-sidebar, .gallery-content-card, .list-surface, .user-management-card, .data-list-card, .settings-card, .category-collapse) {
   color: var(--text);
   border-color: var(--line);
   background: var(--panel);
@@ -248,13 +234,13 @@ html.dark .el-collapse-item__wrap {
   background: var(--panel);
 }
 
-html.dark .el-button:not(.el-button--primary):not(.el-button--danger):not(.top-toolbar-btn) {
+html.dark .el-button:not(.el-button--primary):not(.el-button--danger) {
   color: #cbd4e2;
   border-color: #3a4352;
   background: #242b36;
 }
 
-html.dark .el-button:not(.el-button--primary):not(.el-button--danger):not(.top-toolbar-btn):hover {
+html.dark .el-button:not(.el-button--primary):not(.el-button--danger):hover {
   color: #8bb4ff;
   border-color: #5875a5;
   background: #29364b;

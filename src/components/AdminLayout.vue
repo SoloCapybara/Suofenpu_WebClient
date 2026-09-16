@@ -1,8 +1,12 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import { ArrowDown, Bowl, Moon, Refresh, Search, Shop, Sunny, SwitchButton, UserFilled } from '@element-plus/icons-vue'
+import { ArrowDown, Bowl, Shop, SwitchButton, UserFilled } from '@element-plus/icons-vue'
 import type { NavItem, NavKey } from '../admin-types'
-import AppButton from './AppButton.vue'
+import AdminAvatar from './AdminAvatar.vue'
+import GlobalSearchSpotlight from './GlobalSearchSpotlight.vue'
+import RefreshToolbarButton from './RefreshToolbarButton.vue'
+import StoreStatusToggle from './StoreStatusToggle.vue'
+import ThemeToggle from './ThemeToggle.vue'
 
 const props = defineProps<{
   activeNav: NavKey | ''
@@ -10,17 +14,33 @@ const props = defineProps<{
   storeOpen: boolean
   darkMode: boolean
   adminName: string
+  adminAvatarUrl?: string | null
   adminRole: string
+  globalSearch: string
+  refreshing?: boolean
 }>()
 
-defineEmits<{
+const emit = defineEmits<{
   selectNav: [key: string]
   refresh: []
   'update:storeOpen': [value: boolean]
+  'update:globalSearch': [value: string]
+  globalSearch: []
+  clearGlobalSearch: []
   toggleDarkMode: []
   logout: []
   profile: []
 }>()
+
+function submitGlobalSearch() {
+  emit('globalSearch')
+}
+
+const accountMenuOpen = ref(false)
+
+function onAccountMenuVisibleChange(visible: boolean) {
+  accountMenuOpen.value = visible
+}
 
 const menuWrapRef = ref<HTMLElement | null>(null)
 const indicatorTop = ref(0)
@@ -97,47 +117,42 @@ onBeforeUnmount(() => {
 
     <el-container class="main-panel">
       <el-header class="topbar">
-        <div class="top-search">
-          <el-input placeholder="搜索订单、商品..." :prefix-icon="Search" clearable />
-        </div>
+        <GlobalSearchSpotlight
+          :model-value="globalSearch"
+          @update:model-value="emit('update:globalSearch', $event)"
+          @search="submitGlobalSearch"
+          @clear="emit('clearGlobalSearch')"
+        />
 
         <div class="top-toolbar">
-          <div class="top-toolbar-group">
-            <span class="theme-toggle-anchor">
-              <el-tooltip :content="darkMode ? '切换为浅色模式' : '切换为深色模式'" placement="bottom" :show-after="500">
-                <AppButton
-                  class="top-toolbar-btn"
-                  circle
-                  :icon="darkMode ? Sunny : Moon"
-                  :aria-label="darkMode ? '切换为浅色模式' : '切换为深色模式'"
-                  @click="$emit('toggleDarkMode')"
-                />
-              </el-tooltip>
-            </span>
+          <el-tooltip :content="darkMode ? '切换为浅色模式' : '切换为深色模式'" placement="bottom" :show-after="500">
+            <ThemeToggle :dark-mode="darkMode" @toggle="$emit('toggleDarkMode')" />
+          </el-tooltip>
 
-            <button
-              type="button"
-              class="store-status-chip"
-              :class="{ open: storeOpen }"
-              @click="$emit('update:storeOpen', !storeOpen)"
-            >
-              <span class="store-status-dot"></span>
-              <span>{{ storeOpen ? '营业中' : '已打烊' }}</span>
-            </button>
+          <StoreStatusToggle
+            :model-value="storeOpen"
+            @update:model-value="emit('update:storeOpen', $event)"
+          />
 
-            <el-tooltip content="刷新数据" placement="bottom">
-              <AppButton class="top-toolbar-btn" circle :icon="Refresh" aria-label="刷新数据" @click="$emit('refresh')" />
-            </el-tooltip>
-          </div>
+          <el-tooltip content="刷新数据" placement="bottom">
+            <RefreshToolbarButton :loading="refreshing" @refresh="emit('refresh')" />
+          </el-tooltip>
 
           <el-dropdown
             trigger="click"
             placement="bottom-end"
+            :show-arrow="false"
             popper-class="account-dropdown-popper"
+            @visible-change="onAccountMenuVisibleChange"
             @command="(command: string) => command === 'profile' ? $emit('profile') : command === 'logout' && $emit('logout')"
           >
-            <button type="button" class="admin-user-trigger">
-              <div class="avatar">{{ adminName.slice(0, 1) }}</div>
+            <button
+              type="button"
+              class="admin-user-trigger"
+              :class="{ 'admin-user-trigger--open': accountMenuOpen }"
+              :aria-expanded="accountMenuOpen"
+            >
+              <AdminAvatar :display-name="adminName" :avatar-url="adminAvatarUrl" :size="34" variant="topbar" />
               <div class="admin-user-meta">
                 <strong>{{ adminName }}</strong>
                 <span>{{ adminRole === 'OWNER' ? '超级管理员' : '管理员' }}</span>
@@ -146,7 +161,7 @@ onBeforeUnmount(() => {
             </button>
             <template #dropdown>
               <div class="account-dropdown-head">
-                <div class="account-dropdown-avatar">{{ adminName.slice(0, 1) }}</div>
+                <AdminAvatar :display-name="adminName" :avatar-url="adminAvatarUrl" :size="40" variant="dropdown" />
                 <div><strong>{{ adminName }}</strong><span>{{ adminRole === 'OWNER' ? '超级管理员' : '管理员' }}</span></div>
               </div>
               <el-dropdown-menu class="account-dropdown-menu">

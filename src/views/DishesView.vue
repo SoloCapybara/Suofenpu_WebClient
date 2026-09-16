@@ -1,9 +1,12 @@
 <script setup lang="ts">
-import { computed, reactive, ref } from 'vue'
-import { ArrowRight, CirclePlus, CollectionTag, Refresh, Search } from '@element-plus/icons-vue'
-import { AppMessage } from '../components/AppMessage'
+import { computed, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { CirclePlus, CollectionTag, Refresh, Search } from '@element-plus/icons-vue'
 import AppButton from '../components/AppButton.vue'
-import type { Dish, DishCategory, DishCategoryPayload } from '../types'
+import DataListTabs from '../components/DataListTabs.vue'
+import ListEmptyState from '../components/ListEmptyState.vue'
+import PageHeading from '../components/PageHeading.vue'
+import type { Dish, DishCategory } from '../types'
 
 const props = defineProps<{
   dishes: Dish[]
@@ -12,75 +15,37 @@ const props = defineProps<{
   soldOutCount: number
 }>()
 
-const emit = defineEmits<{
+defineEmits<{
   refresh: []
   create: []
   edit: [dish: Dish]
   toggle: [dish: Dish]
   remove: [dish: Dish]
-  createCategory: [payload: Required<DishCategoryPayload>]
-  updateCategory: [id: number, payload: DishCategoryPayload]
-  deleteCategory: [category: DishCategory]
 }>()
 
-const categoryDialogVisible = ref(false)
-const categoryIconPickerVisible = ref(false)
-const selectedIconLibrary = ref('lucide')
-const editingCategoryId = ref<number>()
+const route = useRoute()
+const router = useRouter()
 const searchKeyword = ref('')
+
+watch(
+  () => route.query.q,
+  (value) => {
+    if (route.path === '/dishes') searchKeyword.value = String(value || '')
+  },
+  { immediate: true },
+)
 const categoryFilter = ref<number | 'all'>('all')
 const statusFilter = ref<'all' | 'selling' | 'offline' | 'soldOut'>('all')
-const categoryPanelOpen = ref<string[]>(['categories'])
-const categoryForm = reactive({
-  code: '',
-  name: '',
-  iconUrl: '',
-  sortOrder: 0,
-  enabled: true,
-})
-
-const iconLibraries = [
-  {
-    key: 'lucide',
-    name: 'Lucide',
-    source: 'Lucide Icons',
-    icons: [
-      ['bowl', '餐碗'], ['carrot', '配菜'], ['cup', '饮品'], ['gift', '套餐'],
-      ['sparkle', '特色'], ['thumbs-up', '推荐'], ['store', '门店'], ['coins', '优惠'],
-      ['crown', '会员'], ['ticket', '券'], ['cart', '购物车'], ['house', '主页'],
-      ['headphones', '客服'], ['message-circle', '消息'], ['map-pin', '位置'], ['log-out', '退出'],
-      ['order', '订单'], ['user', '用户'], ['user-active', '用户高亮'], ['menu', '菜单'],
-      ['smartphone', '手机'], ['search', '搜索'], ['x', '关闭'], ['wechat', '微信'],
-    ],
-  },
-  {
-    key: 'material',
-    name: 'Material Symbols',
-    source: 'Google Material Symbols',
-    icons: [
-      ['restaurant', '餐厅'], ['ramen-dining', '面食'], ['local-cafe', '咖啡'], ['local-drink', '饮料'],
-      ['bakery-dining', '烘焙'], ['icecream', '冰品'], ['lunch-dining', '午餐'], ['fastfood', '快餐'],
-      ['set-meal', '套餐'], ['takeout-dining', '外带'], ['local-pizza', '披萨'], ['cookie', '点心'],
-      ['dinner-dining', '晚餐'], ['brunch-dining', '早午餐'], ['local-bar', '酒吧'], ['wine-bar', '红酒'],
-      ['local-dining', '用餐'], ['kitchen', '厨房'], ['soup-kitchen', '汤品'], ['emoji-food-beverage', '餐饮'],
-      ['grocery', '杂货'], ['shopping-basket', '购物篮'], ['favorite', '收藏'], ['star', '星标'],
-    ],
-  },
-]
-
-const currentIconLibrary = computed(() => iconLibraries.find((library) => library.key === selectedIconLibrary.value) || iconLibraries[0])
-
-function iconUrl(libraryKey: string, iconName: string) {
-  if (libraryKey === 'lucide') return `/icons/lucide/${iconName}.svg`
-  return `https://api.iconify.design/material-symbols:${iconName}.svg?color=%235f6b7a`
-}
-
-function displayIconUrl(iconUrlValue: string) {
-  return iconUrlValue?.replace(/^\/assets\/icons\//, '/icons/') || ''
-}
 
 const availableCount = computed(() => props.dishes.filter((dish) => dish.available).length)
 const totalStock = computed(() => props.dishes.reduce((sum, dish) => sum + Number(dish.stock || 0), 0))
+
+const hasActiveFilters = computed(() => (
+  Boolean(searchKeyword.value.trim())
+  || categoryFilter.value !== 'all'
+  || statusFilter.value !== 'all'
+))
+
 const filteredDishes = computed(() => {
   const keyword = searchKeyword.value.trim().toLowerCase()
   return props.dishes.filter((dish) => {
@@ -95,6 +60,19 @@ const filteredDishes = computed(() => {
   })
 })
 
+const emptyTitle = computed(() => {
+  const keyword = searchKeyword.value.trim()
+  if (keyword) return `未找到与「${keyword}」匹配的商品`
+  if (hasActiveFilters.value) return '暂无符合筛选条件的商品'
+  return '暂无商品'
+})
+
+const emptyDescription = computed(() => {
+  if (searchKeyword.value.trim()) return '试试商品名称、描述或分类关键词'
+  if (props.dishes.length === 0) return '点击右上角「新增商品」开始上架第一款商品'
+  return '调整筛选条件后再试试'
+})
+
 function money(value: number) {
   return `¥${Number(value || 0).toFixed(2)}`
 }
@@ -103,67 +81,27 @@ function categoryDishCount(categoryId: number) {
   return props.dishes.filter((dish) => dish.categoryId === categoryId).length
 }
 
-function openCreateCategory() {
-  editingCategoryId.value = undefined
-  Object.assign(categoryForm, {
-    code: '',
-    name: '',
-    iconUrl: '',
-    sortOrder: props.categories.length + 1,
-    enabled: true,
-  })
-  categoryDialogVisible.value = true
-}
-
-function openEditCategory(category: DishCategory) {
-  editingCategoryId.value = category.id
-  Object.assign(categoryForm, {
-    code: category.code,
-    name: category.name,
-    iconUrl: category.iconUrl,
-    sortOrder: category.sortOrder,
-    enabled: category.enabled,
-  })
-  categoryDialogVisible.value = true
-}
-
-function submitCategory() {
-  const payload = {
-    code: categoryForm.code.trim(),
-    name: categoryForm.name.trim(),
-    iconUrl: categoryForm.iconUrl.trim(),
-    sortOrder: Number(categoryForm.sortOrder),
-    enabled: categoryForm.enabled,
-  }
-  if (!payload.code || !payload.name) return
-  if (!payload.iconUrl) {
-    AppMessage.warning('请选择分类图标')
-    return
-  }
-  if (editingCategoryId.value) {
-    emit('updateCategory', editingCategoryId.value, payload)
-  } else {
-    emit('createCategory', payload)
-  }
-  categoryDialogVisible.value = false
-}
-
-function selectCategoryIcon(libraryKey: string, iconName: string) {
-  categoryForm.iconUrl = iconUrl(libraryKey, iconName)
-  categoryIconPickerVisible.value = false
-}
+const categoryTabItems = computed(() => [
+  { key: 'all' as const, label: '全部商品', count: props.dishes.length },
+  ...props.categories.map((category) => ({
+    key: category.id,
+    label: category.name,
+    count: categoryDishCount(category.id),
+  })),
+])
 </script>
 
 <template>
-  <section class="module-view dishes-view">
-    <header class="dishes-heading">
-      <div class="dishes-heading-copy">
-        <h1>商品管理</h1>
-        <p>维护菜单内容，掌握每一款商品的销售状态</p>
-      </div>
-    </header>
+  <section class="viewport-page module-view dishes-view">
+    <PageHeading title="商品管理" description="维护菜单内容，掌握每一款商品的销售状态">
+      <template #actions>
+        <AppButton :icon="CollectionTag" @click="router.push('/categories')">分类管理</AppButton>
+        <AppButton :icon="Refresh" :loading="loading" @click="$emit('refresh')">刷新</AppButton>
+        <AppButton type="primary" :icon="CirclePlus" @click="$emit('create')">新增商品</AppButton>
+      </template>
+    </PageHeading>
 
-    <section class="product-summary">
+    <section class="product-summary dishes-stat-row">
       <div class="summary-lead">
         <span>商品概览</span>
         <div><strong>{{ availableCount }}</strong><small>/ {{ dishes.length }} 款正在售卖</small></div>
@@ -173,69 +111,15 @@ function selectCategoryIcon(libraryKey: string, iconName: string) {
       <div class="summary-stat"><small>菜单分类</small><strong>{{ categories.length }}</strong><span>组</span></div>
     </section>
 
-    <el-collapse v-model="categoryPanelOpen" class="category-collapse">
-      <el-collapse-item name="categories">
-        <template #title>
-          <div class="category-collapse-title">
-            <span class="dishes-title-icon amber"><el-icon><CollectionTag /></el-icon></span>
-            <span><strong>分类管理</strong><small>共 {{ categories.length }} 个分类</small></span>
-          </div>
-        </template>
-        <div class="category-content">
-          <div class="category-actions">
-            <span>整理菜单分类及展示顺序</span>
-            <div class="panel-actions">
-              <AppButton class="quiet-icon-button" :icon="Refresh" circle :loading="loading" title="刷新分类" @click="$emit('refresh')" />
-              <AppButton type="primary" :icon="CirclePlus" @click="openCreateCategory">新增分类</AppButton>
-            </div>
-          </div>
-          <el-table class="dishes-table category-table" :data="categories" row-key="id" empty-text="暂无分类">
-            <el-table-column label="排序" width="90"><template #default="{ row }"><span class="sort-badge">{{ row.sortOrder }}</span></template></el-table-column>
-            <el-table-column label="图标" width="100">
-              <template #default="{ row }">
-                <div class="category-icon-cell">
-                  <el-image v-if="row.iconUrl" :src="displayIconUrl(row.iconUrl)" fit="contain"><template #error><span>不可用</span></template></el-image>
-                  <span v-else>未配置</span>
-                </div>
-              </template>
-            </el-table-column>
-            <el-table-column label="分类名称" min-width="160"><template #default="{ row }"><strong class="category-name">{{ row.name }}</strong></template></el-table-column>
-            <el-table-column label="分类编码" min-width="150"><template #default="{ row }"><code class="category-code">{{ row.code }}</code></template></el-table-column>
-            <el-table-column label="状态" width="100"><template #default="{ row }"><el-tag :type="row.enabled ? 'success' : 'info'">{{ row.enabled ? '启用' : '停用' }}</el-tag></template></el-table-column>
-            <el-table-column label="操作" width="300" fixed="right" align="center">
-              <template #default="{ row }"><div class="dish-row-actions"><AppButton @click="openEditCategory(row)">编辑</AppButton><AppButton :type="row.enabled ? 'warning' : 'success'" plain @click="$emit('updateCategory', row.id, { enabled: !row.enabled })">{{ row.enabled ? '停用' : '启用' }}</AppButton><AppButton type="danger" plain @click="$emit('deleteCategory', row)">删除</AppButton></div></template>
-            </el-table-column>
-          </el-table>
-        </div>
-      </el-collapse-item>
-    </el-collapse>
-
-    <section class="product-workbench">
-      <header class="product-workbench-head">
-        <div>
-          <h2>商品库</h2>
-        </div>
-        <div class="panel-actions">
-          <AppButton class="quiet-icon-button" :icon="Refresh" circle :loading="loading" title="刷新商品" @click="$emit('refresh')" />
-          <AppButton type="primary" :icon="CirclePlus" @click="$emit('create')">新增商品</AppButton>
-        </div>
-      </header>
-      <nav class="product-category-tabs" aria-label="商品分类筛选">
-        <button type="button" :class="{ active: categoryFilter === 'all' }" @click="categoryFilter = 'all'">
-          全部商品 <span>{{ dishes.length }}</span>
-        </button>
-        <button
-          v-for="category in categories"
-          :key="category.id"
-          type="button"
-          :class="{ active: categoryFilter === category.id }"
-          @click="categoryFilter = category.id"
-        >
-          {{ category.name }} <span>{{ categoryDishCount(category.id) }}</span>
-        </button>
-      </nav>
+    <section class="product-workbench list-surface">
+      <DataListTabs
+        v-model="categoryFilter"
+        class="product-category-tabs"
+        aria-label="商品分类筛选"
+        :items="categoryTabItems"
+      />
       <el-alert v-if="soldOutCount" type="warning" :closable="false" class="stock-alert" :title="`${soldOutCount} 个商品已售罄，请及时补库存或下架`" />
-      <div class="product-toolbar">
+      <div class="data-list-toolbar product-toolbar">
         <el-input v-model="searchKeyword" class="product-search" clearable placeholder="搜索商品名称、描述或分类" :prefix-icon="Search" />
         <el-select v-model="statusFilter" class="product-filter">
           <el-option label="全部状态" value="all" />
@@ -245,110 +129,63 @@ function selectCategoryIcon(libraryKey: string, iconName: string) {
         </el-select>
         <span class="filter-result">找到 {{ filteredDishes.length }} 款</span>
       </div>
-      <el-table class="dishes-table product-table" :data="filteredDishes" v-loading="loading" row-key="id" empty-text="暂无匹配商品">
-        <el-table-column label="商品" min-width="350">
-          <template #default="{ row }">
-            <div class="dish-product-cell">
-              <div class="dish-thumb">
-                <el-image v-if="row.imageUrl" :src="row.imageUrl" fit="cover" lazy>
-                  <template #error>
-                    <img class="dish-placeholder-image" src="/images/dish-placeholder.svg" alt="暂无商品展示图" />
-                  </template>
-                </el-image>
-                <img v-else class="dish-placeholder-image" src="/images/dish-placeholder.svg" alt="暂无商品展示图" />
+      <div class="list-surface__scroll">
+        <el-table
+          class="admin-data-table product-table"
+          :data="filteredDishes"
+          v-loading="loading"
+          row-key="id"
+          height="100%"
+        >
+          <template #empty>
+            <ListEmptyState variant="product" :title="emptyTitle" :description="emptyDescription" />
+          </template>
+          <el-table-column label="商品" min-width="350">
+            <template #default="{ row }">
+              <div class="dish-product-cell">
+                <div class="dish-thumb">
+                  <el-image v-if="row.imageUrl" :src="row.imageUrl" fit="cover" lazy>
+                    <template #error>
+                      <img class="dish-placeholder-image" src="/images/dish-placeholder.svg" alt="暂无商品展示图" />
+                    </template>
+                  </el-image>
+                  <img v-else class="dish-placeholder-image" src="/images/dish-placeholder.svg" alt="暂无商品展示图" />
+                </div>
+                <div class="dish-name">
+                  <strong>{{ row.name }}</strong>
+                  <span>{{ row.shortDescription || '暂无商品简介' }}</span>
+                  <small>商品编号 {{ String(row.id).padStart(4, '0') }}</small>
+                </div>
               </div>
-              <div class="dish-name">
-                <strong>{{ row.name }}</strong>
-                <span>{{ row.shortDescription || '暂无商品简介' }}</span>
-                <small>商品编号 {{ String(row.id).padStart(4, '0') }}</small>
+            </template>
+          </el-table-column>
+          <el-table-column label="分类" width="140">
+            <template #default="{ row }"><span class="dish-category-pill">{{ row.categoryName }}</span></template>
+          </el-table-column>
+          <el-table-column label="售价" width="130">
+            <template #default="{ row }"><strong class="dish-price">{{ money(row.price) }}</strong></template>
+          </el-table-column>
+          <el-table-column label="库存" width="120">
+            <template #default="{ row }"><span class="dish-stock" :class="{ empty: row.stock <= 0 }"><b>{{ row.stock }}</b><small>{{ row.stock <= 0 ? '已售罄' : '份可售' }}</small></span></template>
+          </el-table-column>
+          <el-table-column label="销售状态" width="150">
+            <template #default="{ row }">
+              <div class="dish-availability">
+                <el-switch :model-value="row.available" @change="$emit('toggle', row)" />
+                <span>{{ row.available ? '销售中' : '已下架' }}</span>
               </div>
-            </div>
-          </template>
-        </el-table-column>
-        <el-table-column label="分类" width="140">
-          <template #default="{ row }"><span class="dish-category-pill">{{ row.categoryName }}</span></template>
-        </el-table-column>
-        <el-table-column label="售价" width="130">
-          <template #default="{ row }"><strong class="dish-price">{{ money(row.price) }}</strong></template>
-        </el-table-column>
-        <el-table-column label="库存" width="120">
-          <template #default="{ row }"><span class="dish-stock" :class="{ empty: row.stock <= 0 }"><b>{{ row.stock }}</b><small>{{ row.stock <= 0 ? '已售罄' : '份可售' }}</small></span></template>
-        </el-table-column>
-        <el-table-column label="销售状态" width="150">
-          <template #default="{ row }">
-            <div class="dish-availability">
-              <el-switch :model-value="row.available" @change="$emit('toggle', row)" />
-              <span>{{ row.available ? '销售中' : '已下架' }}</span>
-            </div>
-          </template>
-        </el-table-column>
-        <el-table-column label="操作" width="170" align="left">
-          <template #default="{ row }">
-            <div class="dish-row-actions dish-row-actions-compact">
-              <AppButton class="dish-edit-link" link @click="$emit('edit', row)">编辑 <el-icon><ArrowRight /></el-icon></AppButton>
-              <AppButton class="dish-delete-link" type="danger" link @click="$emit('remove', row)">删除</AppButton>
-            </div>
-          </template>
-        </el-table-column>
-      </el-table>
+            </template>
+          </el-table-column>
+          <el-table-column label="操作" width="170" align="left">
+            <template #default="{ row }">
+              <div class="data-list-actions">
+                <AppButton link @click="$emit('edit', row)">编辑</AppButton>
+                <AppButton link type="danger" @click="$emit('remove', row)">删除</AppButton>
+              </div>
+            </template>
+          </el-table-column>
+        </el-table>
+      </div>
     </section>
-
-    <el-dialog v-model="categoryDialogVisible" :title="editingCategoryId ? '编辑分类' : '新增分类'" width="460px">
-      <el-form :model="categoryForm" label-width="84px">
-        <el-form-item label="分类名称" required>
-          <el-input v-model="categoryForm.name" placeholder="例如：螺蛳粉" />
-        </el-form-item>
-        <el-form-item label="分类编码" required>
-          <el-input v-model="categoryForm.code" placeholder="例如：noodles" />
-        </el-form-item>
-        <el-form-item label="分类图标" required>
-          <div class="category-icon-selector">
-            <div class="category-icon-preview">
-              <el-image v-if="categoryForm.iconUrl" :src="displayIconUrl(categoryForm.iconUrl)" fit="contain"><template #error><span>图标不可用</span></template></el-image>
-              <span v-else>未选择</span>
-            </div>
-            <AppButton type="primary" plain @click="categoryIconPickerVisible = true">选择图标</AppButton>
-          </div>
-        </el-form-item>
-        <el-form-item label="排序">
-          <el-input-number v-model="categoryForm.sortOrder" :min="0" :step="1" style="width: 100%" />
-        </el-form-item>
-        <el-form-item label="启用">
-          <el-switch v-model="categoryForm.enabled" />
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <AppButton @click="categoryDialogVisible = false">取消</AppButton>
-        <AppButton type="primary" @click="submitCategory">保存</AppButton>
-      </template>
-    </el-dialog>
-
-    <el-dialog v-model="categoryIconPickerVisible" title="选择分类图标" width="760px" append-to-body>
-      <div class="icon-library-tabs">
-        <button
-          v-for="library in iconLibraries"
-          :key="library.key"
-          type="button"
-          :class="{ active: selectedIconLibrary === library.key }"
-          @click="selectedIconLibrary = library.key"
-        >
-          <strong>{{ library.name }}</strong><small>{{ library.source }}</small>
-        </button>
-      </div>
-      <div class="category-icon-grid">
-        <button
-          v-for="icon in currentIconLibrary.icons"
-          :key="icon[0]"
-          type="button"
-          class="category-icon-option"
-          :class="{ active: categoryForm.iconUrl === iconUrl(currentIconLibrary.key, icon[0]) }"
-          @click="selectCategoryIcon(currentIconLibrary.key, icon[0])"
-        >
-          <el-image class="category-icon-option-image" :src="iconUrl(currentIconLibrary.key, icon[0])" fit="contain" />
-          <strong>{{ icon[1] }}</strong>
-          <span>{{ icon[0] }}</span>
-        </button>
-      </div>
-    </el-dialog>
   </section>
 </template>

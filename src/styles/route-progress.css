@@ -1,0 +1,42 @@
+.route-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10000;
+  height: 2px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.18s ease;
+}
+
+.route-progress.active {
+  opacity: 1;
+}
+
+.route-progress__bar {
+  height: 100%;
+  width: 100%;
+  transform-origin: 0 50%;
+  border-radius: 0 999px 999px 0;
+  background: linear-gradient(90deg, #2f73ff 0%, #6ea0ff 55%, #7dcbff 100%);
+  box-shadow: 0 0 8px rgba(47, 115, 255, 0.28);
+  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.route-progress.finishing .route-progress__bar {
+  transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+  box-shadow: 0 0 10px rgba(47, 115, 255, 0.36);
+}
+
+html.dark .route-progress__bar {
+  background: linear-gradient(90deg, #5b8fff 0%, #7eb0ff 55%, #9ec8ff 100%);
+  box-shadow: 0 0 8px rgba(110, 160, 255, 0.32);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .route-progress,
+  .route-progress__bar {
+    transition: none !important;
+  }
+}

@@ -1,10 +1,17 @@
 /* Admin styles entry — import order matches legacy style.css cascade. */
 @import './base.css';
+@import './scrollbars.css';
+@import './route-progress.css';
 @import './layout.css';
+@import './viewport-list.css';
+@import './data-list.css';
 @import './dashboard.css';
 @import './orders.css';
 @import './dishes.css';
 @import './components/account-dropdown.css';
+@import './components/admin-avatar.css';
+@import './components/theme-toggle.css';
+@import './components/top-toolbar-controls.css';
 @import './profile.css';
 @import './theme-dark.css';
 @import './dishes-extras.css';

@@ -1,0 +1,37 @@
+.admin-avatar.el-avatar {
+  flex: 0 0 auto;
+  color: #fff;
+  background: linear-gradient(135deg, #2f73ff, #7dcbff);
+  font-weight: 800;
+}
+
+.admin-avatar.el-avatar--square {
+  border-radius: 10px;
+}
+
+.admin-avatar--topbar.el-avatar--square {
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 900;
+  box-shadow: none;
+}
+
+.admin-avatar--dropdown.el-avatar--square {
+  border-radius: 12px;
+  box-shadow: 0 8px 18px rgba(47, 115, 255, 0.22);
+}
+
+.admin-avatar--profile.el-avatar--square {
+  border-radius: 18px;
+  font-size: 25px;
+  box-shadow: 0 14px 28px rgba(53, 116, 237, 0.22);
+}
+
+.admin-avatar--table.el-avatar--square {
+  border-radius: 12px;
+  font-size: 15px;
+}
+
+.admin-avatar.el-avatar img {
+  object-fit: cover;
+}

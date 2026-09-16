@@ -1,31 +1,12 @@
 /* === gallery.css: Gallery management (lines 2331-3141) === */
 .gallery-page {
-  height: calc(100vh - 64px - 42px);
+  flex: 1 1 auto;
   min-height: 0;
+  height: 100%;
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
   gap: 16px;
   overflow: hidden;
-}
-
-.gallery-topbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-}
-
-.gallery-topbar h1 {
-  margin: 0;
-  color: #18243c;
-  font-size: 26px;
-  font-weight: 900;
-}
-
-.gallery-topbar p {
-  margin: 8px 0 0;
-  color: var(--muted);
-  font-size: 13px;
 }
 
 .gallery-toolbar {
@@ -34,6 +15,8 @@
   justify-content: flex-end;
   gap: 10px;
   flex-wrap: wrap;
+  overflow: visible;
+  padding: 2px 0;
 }
 
 .gallery-toolbar .el-input {
@@ -56,9 +39,11 @@
 .gallery-sidebar,
 .gallery-content-card {
   border: 1px solid var(--line);
-  border-radius: 10px;
-  background: #fff;
-  box-shadow: 0 10px 26px rgba(32, 54, 96, 0.05);
+  border-radius: var(--radius-panel);
+  background: var(--panel);
+  box-shadow: 0 8px 24px rgba(31, 38, 53, 0.06);
+  overflow: hidden;
+  isolation: isolate;
 }
 
 .gallery-sidebar {
@@ -130,8 +115,10 @@
 
 .gallery-folder-scroll {
   position: relative;
+  flex: 1 1 auto;
   min-height: 0;
   overflow: auto;
+  overscroll-behavior: contain;
   display: grid;
   align-content: start;
   gap: 6px;
@@ -579,7 +566,12 @@
   min-height: 0;
   margin-top: 12px;
   overflow: auto;
+  overscroll-behavior: contain;
   padding-right: 4px;
+}
+
+.gallery-files-scroll > .list-empty-state {
+  min-height: min(420px, 52vh);
 }
 
 .gallery-file-card {

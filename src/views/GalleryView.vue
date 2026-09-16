@@ -16,6 +16,8 @@ import {
 } from '@element-plus/icons-vue'
 import { AppMessage } from '../components/AppMessage'
 import AppButton from '../components/AppButton.vue'
+import ListEmptyState from '../components/ListEmptyState.vue'
+import PageHeading from '../components/PageHeading.vue'
 import type { GalleryResponse, ImageAsset } from '../types'
 
 const props = defineProps<{
@@ -122,40 +124,13 @@ function folderDisplayName(path: string) {
   return parts[parts.length - 1] || ''
 }
 
-function playFolderSound(direction: 'open' | 'back' = 'open') {
-  const legacyWindow = window as typeof window & { webkitAudioContext?: typeof AudioContext }
-  const AudioContextConstructor = window.AudioContext || legacyWindow.webkitAudioContext
-  if (!AudioContextConstructor) return
-
-  const context = new AudioContextConstructor()
-  const oscillator = context.createOscillator()
-  const gain = context.createGain()
-  const now = context.currentTime
-  const startFrequency = direction === 'open' ? 520 : 430
-  const endFrequency = direction === 'open' ? 760 : 330
-
-  oscillator.type = 'sine'
-  oscillator.frequency.setValueAtTime(startFrequency, now)
-  oscillator.frequency.exponentialRampToValueAtTime(endFrequency, now + 0.11)
-  gain.gain.setValueAtTime(0.0001, now)
-  gain.gain.exponentialRampToValueAtTime(0.045, now + 0.012)
-  gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.15)
-  oscillator.connect(gain)
-  gain.connect(context.destination)
-  oscillator.start(now)
-  oscillator.stop(now + 0.16)
-  oscillator.addEventListener('ended', () => context.close())
-}
-
 function selectFolder(path: string) {
   if (activeFolder.value === path) return
   activeFolder.value = path
-  playFolderSound('open')
 }
 
 function goToParentFolder() {
   activeFolder.value = parentFolderPath(activeFolder.value)
-  playFolderSound('back')
 }
 
 function triggerFileInput() {
@@ -227,25 +202,23 @@ function dateText(value: string) {
 </script>
 
 <template>
-  <section class="gallery-page">
-    <header class="gallery-topbar">
-      <div>
-        <h1>图库管理</h1>
-        <p>当前位置：全部图片 / {{ currentFolderName }}</p>
-      </div>
-      <div class="gallery-toolbar">
-        <el-input v-model="keyword" :prefix-icon="Search" placeholder="搜索文件名" clearable />
-        <el-select v-model="sortMode" class="gallery-sort">
-          <template #prefix><el-icon><Sort /></el-icon></template>
-          <el-option label="默认排序" value="nameAsc" />
-          <el-option label="最新上传" value="timeDesc" />
-          <el-option label="文件最大" value="sizeDesc" />
-        </el-select>
-        <AppButton type="primary" :icon="Upload" @click="triggerFileInput">上传图片</AppButton>
-        <AppButton :icon="Refresh" :loading="loading" @click="$emit('refresh')">刷新</AppButton>
-        <input ref="fileInput" class="hidden-file-input" type="file" accept="image/*" multiple @change="onFileChange" />
-      </div>
-    </header>
+  <section class="viewport-page gallery-page">
+    <PageHeading title="图库管理" description="上传和管理门店图片素材，供商品展示使用">
+      <template #actions>
+        <div class="gallery-toolbar">
+          <el-input v-model="keyword" :prefix-icon="Search" placeholder="搜索文件名" clearable />
+          <el-select v-model="sortMode" class="gallery-sort">
+            <template #prefix><el-icon><Sort /></el-icon></template>
+            <el-option label="默认排序" value="nameAsc" />
+            <el-option label="最新上传" value="timeDesc" />
+            <el-option label="文件最大" value="sizeDesc" />
+          </el-select>
+          <AppButton type="primary" :icon="Upload" @click="triggerFileInput">上传图片</AppButton>
+          <AppButton :icon="Refresh" :loading="loading" @click="$emit('refresh')">刷新</AppButton>
+          <input ref="fileInput" class="hidden-file-input" type="file" accept="image/*" multiple @change="onFileChange" />
+        </div>
+      </template>
+    </PageHeading>
 
     <div class="gallery-manager">
       <aside class="gallery-sidebar">
@@ -377,7 +350,12 @@ function dateText(value: string) {
         </div>
 
         <div class="gallery-files-scroll">
-          <el-empty v-if="!displayedImages.length && !loading" description="当前文件夹暂无图片" />
+          <ListEmptyState
+            v-if="!displayedImages.length && !loading"
+            variant="gallery"
+            :title="keyword.trim() ? `未找到与「${keyword.trim()}」匹配的图片` : '当前文件夹暂无图片'"
+            :description="keyword.trim() ? '试试文件名或文件夹名称' : '点击上传或将图片拖拽到上方区域'"
+          />
           <div v-else v-loading="loading" class="gallery-file-grid" :class="`${viewMode}-view`">
             <article v-for="asset in pagedImages" :key="asset.id" class="gallery-file-card">
               <el-checkbox

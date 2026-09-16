@@ -20,6 +20,9 @@
   --purple: #8358f6;
   --cyan: #20c5c8;
   --red: #ff5a52;
+  --radius-panel: 16px;
+  --radius-control: 10px;
+  --radius-chip: 8px;
 }
 
 body {

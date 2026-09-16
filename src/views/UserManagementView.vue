@@ -9,7 +9,11 @@ import {
   updateCustomerAccountStatus, updateEmployeeAccount,
 } from '../api'
 import { AppMessage } from '../components/AppMessage'
+import AdminAvatar from '../components/AdminAvatar.vue'
 import AppButton from '../components/AppButton.vue'
+import DataListTabs from '../components/DataListTabs.vue'
+import ListEmptyState from '../components/ListEmptyState.vue'
+import PageHeading from '../components/PageHeading.vue'
 
 const props = defineProps<{ currentAdmin: AdminProfile | null }>()
 const activeTab = ref<'employees' | 'customers'>('employees')
@@ -26,6 +30,11 @@ const resetRef = ref<FormInstance>()
 const employeeForm = reactive({ username: '', displayName: '', password: '', role: 'STAFF' })
 const resetForm = reactive({ password: '', confirmPassword: '' })
 const isOwner = computed(() => props.currentAdmin?.role === 'OWNER')
+
+const userTabItems = computed(() => [
+  { key: 'employees' as const, label: '员工账号', count: employees.value.length, icon: UserFilled },
+  { key: 'customers' as const, label: '小程序用户', count: customers.value.length, icon: User },
+])
 
 const employeeRules: FormRules = {
   username: [{ required: true, message: '请输入登录账号', trigger: 'blur' }],
@@ -127,11 +136,12 @@ onMounted(refresh)
 </script>
 
 <template>
-  <section class="user-management-page">
-    <header class="user-management-heading">
-      <div><span>ACCOUNT MANAGEMENT</span><h1>用户管理</h1><p>后台员工账号与小程序普通用户分开管理</p></div>
-      <AppButton v-if="activeTab === 'employees' && isOwner" type="primary" :icon="CirclePlus" @click="openCreate">新增员工</AppButton>
-    </header>
+  <section class="viewport-page user-management-page">
+    <PageHeading title="用户管理" description="后台员工账号与小程序普通用户分开管理">
+      <template #actions>
+        <AppButton v-if="activeTab === 'employees' && isOwner" type="primary" :icon="CirclePlus" @click="openCreate">新增员工</AppButton>
+      </template>
+    </PageHeading>
 
     <section class="user-stat-row">
       <div><span class="user-stat-icon blue"><UserFilled /></span><p>员工账号<strong>{{ employees.length }}</strong><small>{{ enabledEmployees }} 个正常使用</small></p></div>
@@ -140,30 +150,48 @@ onMounted(refresh)
     </section>
 
     <section class="user-management-card">
-      <div class="user-management-tabs">
-        <button :class="{ active: activeTab === 'employees' }" @click="activeTab = 'employees'; keyword = ''"><UserFilled />员工账号<span>{{ employees.length }}</span></button>
-        <button :class="{ active: activeTab === 'customers' }" @click="activeTab = 'customers'; keyword = ''"><User />小程序用户<span>{{ customers.length }}</span></button>
-      </div>
+      <DataListTabs
+        v-model="activeTab"
+        class="user-management-tabs"
+        :items="userTabItems"
+        @update:model-value="keyword = ''"
+      />
       <div class="user-management-toolbar">
         <el-input v-model="keyword" :prefix-icon="Search" clearable :placeholder="activeTab === 'employees' ? '搜索员工姓名或登录账号' : '搜索用户昵称或手机号'" />
         <AppButton :icon="Refresh" :loading="loading" @click="refresh">刷新</AppButton>
       </div>
 
-      <el-table v-if="activeTab === 'employees'" v-loading="loading" :data="filteredEmployees" empty-text="暂无员工账号">
-        <el-table-column label="员工" min-width="230"><template #default="{ row }"><div class="account-cell"><span>{{ row.displayName.slice(0, 1) }}</span><div><strong>{{ row.displayName }}</strong><small>@{{ row.username }}</small></div></div></template></el-table-column>
+      <div class="list-surface__scroll">
+      <el-table v-if="activeTab === 'employees'" class="admin-data-table" v-loading="loading" :data="filteredEmployees" height="100%">
+        <template #empty>
+          <ListEmptyState
+            variant="user"
+            :title="keyword.trim() ? `未找到与「${keyword.trim()}」匹配的员工` : '暂无员工账号'"
+            :description="keyword.trim() ? '试试员工姓名或登录账号' : '点击右上角「新增员工」创建后台账号'"
+          />
+        </template>
+        <el-table-column label="员工" min-width="230"><template #default="{ row }"><div class="account-cell customer"><AdminAvatar :display-name="row.displayName" :avatar-url="row.avatarUrl" :size="38" variant="table" /><div><strong>{{ row.displayName }}</strong><small>@{{ row.username }}</small></div></div></template></el-table-column>
         <el-table-column label="角色" width="150"><template #default="{ row }"><span class="account-role" :class="row.role.toLowerCase()">{{ roleText(row.role) }}</span></template></el-table-column>
         <el-table-column label="状态" width="130"><template #default="{ row }"><span class="account-status" :class="{ disabled: !row.enabled }"><i />{{ row.enabled ? '正常' : '已停用' }}</span></template></el-table-column>
         <el-table-column label="创建时间" width="150"><template #default="{ row }">{{ dateText(row.createdAt) }}</template></el-table-column>
         <el-table-column label="操作" width="250" align="left"><template #default="{ row }"><div class="account-actions"><AppButton link :disabled="!isOwner" @click="openEdit(row)">编辑</AppButton><AppButton link :disabled="!isOwner" @click="openReset(row)">重置密码</AppButton><AppButton link :type="row.enabled ? 'danger' : 'success'" :disabled="!isOwner || row.id === currentAdmin?.id" @click="toggleEmployee(row)">{{ row.enabled ? '停用' : '启用' }}</AppButton></div></template></el-table-column>
       </el-table>
 
-      <el-table v-else v-loading="loading" :data="filteredCustomers" empty-text="暂无小程序用户">
+      <el-table v-else class="admin-data-table" v-loading="loading" :data="filteredCustomers" height="100%">
+        <template #empty>
+          <ListEmptyState
+            variant="user"
+            :title="keyword.trim() ? `未找到与「${keyword.trim()}」匹配的用户` : '暂无小程序用户'"
+            :description="keyword.trim() ? '试试用户昵称或手机号' : '用户通过小程序注册后会显示在这里'"
+          />
+        </template>
         <el-table-column label="用户" min-width="250"><template #default="{ row }"><div class="account-cell customer"><el-avatar :src="displayAvatarUrl(row.avatarUrl)" :size="38">{{ row.nickname?.slice(0, 1) || '用' }}</el-avatar><div><strong>{{ row.nickname || '微信用户' }}</strong><small>用户编号 #{{ row.id }}</small></div></div></template></el-table-column>
         <el-table-column label="手机号" min-width="170"><template #default="{ row }">{{ row.phone || '未绑定' }}</template></el-table-column>
         <el-table-column label="注册时间" width="150"><template #default="{ row }">{{ dateText(row.createdAt) }}</template></el-table-column>
         <el-table-column label="状态" width="130"><template #default="{ row }"><span class="account-status" :class="{ disabled: row.status !== 'ACTIVE' }"><i />{{ row.status === 'ACTIVE' ? '正常' : '已停用' }}</span></template></el-table-column>
         <el-table-column label="操作" width="120"><template #default="{ row }"><AppButton link :type="row.status === 'ACTIVE' ? 'danger' : 'success'" :disabled="!isOwner" @click="toggleCustomer(row)">{{ row.status === 'ACTIVE' ? '停用' : '启用' }}</AppButton></template></el-table-column>
       </el-table>
+      </div>
     </section>
 
     <el-dialog v-model="employeeDialog" :title="editingId ? '编辑员工' : '新增员工'" width="480px">

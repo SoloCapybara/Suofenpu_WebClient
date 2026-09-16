@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from 'vue'
-import { Key, Lock, User, UserFilled } from '@element-plus/icons-vue'
+import { Camera, Key, Lock, User, UserFilled } from '@element-plus/icons-vue'
 import type { FormInstance, FormRules } from 'element-plus'
 import type { AdminProfile } from '../auth'
 import { updateStoredAdmin } from '../auth'
-import { changeAdminPassword, updateAdminProfile } from '../api'
+import { changeAdminPassword, removeAdminAvatar, updateAdminProfile, uploadAdminAvatar } from '../api'
 import { AppMessage } from '../components/AppMessage'
+import AdminAvatar from '../components/AdminAvatar.vue'
 import AppButton from '../components/AppButton.vue'
+import PageHeading from '../components/PageHeading.vue'
 
 const props = defineProps<{ profile: AdminProfile | null }>()
 const emit = defineEmits<{ updated: [profile: AdminProfile] }>()
@@ -14,6 +16,8 @@ const profileRef = ref<FormInstance>()
 const passwordRef = ref<FormInstance>()
 const profileLoading = ref(false)
 const passwordLoading = ref(false)
+const avatarLoading = ref(false)
+const avatarInputRef = ref<HTMLInputElement | null>(null)
 const profileForm = reactive({ displayName: props.profile?.displayName || '' })
 const passwordForm = reactive({ currentPassword: '', newPassword: '', confirmPassword: '' })
 
@@ -41,6 +45,54 @@ const passwordRules: FormRules = {
     { required: true, message: '请再次输入新密码', trigger: 'blur' },
     { validator: (_rule, value, callback) => value === passwordForm.newPassword ? callback() : callback(new Error('两次输入的新密码不一致')), trigger: 'blur' },
   ],
+}
+
+const hasCustomAvatar = computed(() => Boolean(props.profile?.avatarUrl?.trim()))
+
+function openAvatarPicker() {
+  if (avatarLoading.value) return
+  avatarInputRef.value?.click()
+}
+
+async function onAvatarSelected(event: Event) {
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+  input.value = ''
+  if (!file) return
+  if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+    AppMessage.warning('只支持 JPG、PNG、WebP 格式')
+    return
+  }
+  if (file.size > 5 * 1024 * 1024) {
+    AppMessage.warning('头像图片不能超过 5MB')
+    return
+  }
+  avatarLoading.value = true
+  try {
+    const profile = await uploadAdminAvatar(file)
+    updateStoredAdmin(profile)
+    emit('updated', profile)
+    AppMessage.success('头像已更新')
+  } catch (error) {
+    AppMessage.error(error instanceof Error ? error.message : '头像上传失败')
+  } finally {
+    avatarLoading.value = false
+  }
+}
+
+async function resetAvatar() {
+  if (!hasCustomAvatar.value || avatarLoading.value) return
+  avatarLoading.value = true
+  try {
+    const profile = await removeAdminAvatar()
+    updateStoredAdmin(profile)
+    emit('updated', profile)
+    AppMessage.success('已恢复默认头像')
+  } catch (error) {
+    AppMessage.error(error instanceof Error ? error.message : '恢复默认头像失败')
+  } finally {
+    avatarLoading.value = false
+  }
 }
 
 async function saveProfile() {
@@ -77,17 +129,47 @@ async function savePassword() {
 </script>
 
 <template>
-  <section class="profile-page">
-    <header class="profile-heading">
-      <div>
-        <span>ACCOUNT</span>
-        <h1>个人中心</h1>
-        <p>管理你的管理员资料与账号安全</p>
-      </div>
-    </header>
+  <section class="profile-page content-scroll-page">
+    <PageHeading title="个人中心" description="管理你的管理员资料与账号安全" />
 
     <section class="profile-overview">
-      <div class="profile-avatar-large">{{ profile?.displayName?.slice(0, 1) || '管' }}</div>
+      <div class="profile-avatar-block">
+        <button
+          type="button"
+          class="profile-avatar-picker"
+          :class="{ loading: avatarLoading }"
+          :disabled="avatarLoading"
+          aria-label="更换头像"
+          @click="openAvatarPicker"
+        >
+          <AdminAvatar
+            :display-name="profile?.displayName || '管理员'"
+            :avatar-url="profile?.avatarUrl"
+            :size="68"
+            variant="profile"
+          />
+          <span class="profile-avatar-picker__overlay">
+            <el-icon><Camera /></el-icon>
+            <small>{{ avatarLoading ? '上传中…' : '更换头像' }}</small>
+          </span>
+        </button>
+        <input
+          ref="avatarInputRef"
+          class="profile-avatar-input"
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          @change="onAvatarSelected"
+        />
+        <AppButton
+          v-if="hasCustomAvatar"
+          link
+          class="profile-avatar-reset"
+          :disabled="avatarLoading"
+          @click="resetAvatar"
+        >
+          恢复默认
+        </AppButton>
+      </div>
       <div class="profile-identity">
         <h2>{{ profile?.displayName || '管理员' }}</h2>
         <div><span>{{ roleName }}</span><b>账号状态正常</b></div>

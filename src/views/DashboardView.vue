@@ -1,6 +1,9 @@
 <script setup lang="ts">
-import { Refresh, Right } from '@element-plus/icons-vue'
+import { Refresh } from '@element-plus/icons-vue'
 import AppButton from '../components/AppButton.vue'
+import ListEmptyState from '../components/ListEmptyState.vue'
+import PageHeading from '../components/PageHeading.vue'
+import PanelNavLink from '../components/PanelNavLink.vue'
 import type { StatCard, StatusMeta, TopOrderItem } from '../admin-types'
 import type { Dish, Order, OrderStatus } from '../types'
 
@@ -44,14 +47,12 @@ function orderItemsText(order: Order) {
 </script>
 
 <template>
-  <section class="dashboard-view">
-    <div class="page-heading">
-      <div>
-        <h1>今日经营</h1>
-        <p>查看本店今日订单、营收和库存情况</p>
-      </div>
-      <AppButton :icon="Refresh" :loading="loading" @click="$emit('refresh')">刷新数据</AppButton>
-    </div>
+  <section class="dashboard-view content-scroll-page">
+    <PageHeading title="今日经营" description="查看本店今日订单、营收和库存情况">
+      <template #actions>
+        <AppButton :icon="Refresh" :loading="loading" @click="$emit('refresh')">刷新数据</AppButton>
+      </template>
+    </PageHeading>
 
     <article class="store-summary-card">
       <div class="store-summary-main">
@@ -85,10 +86,13 @@ function orderItemsText(order: Order) {
         <template #header>
           <div class="panel-title compact">
             <strong>待处理订单 ({{ pendingOrders.length }})</strong>
-            <AppButton link type="primary" :icon="Right" @click="$emit('goOrders')">全部订单</AppButton>
+            <PanelNavLink label="全部订单" @click="$emit('goOrders')" />
           </div>
         </template>
-        <el-table :data="pendingOrders" size="small" max-height="360" empty-text="暂无待处理订单">
+        <el-table :data="pendingOrders" size="small" max-height="360">
+          <template #empty>
+            <ListEmptyState compact variant="order" title="暂无待处理订单" description="当前没有需要跟进的订单" />
+          </template>
           <el-table-column prop="orderNo" label="订单号" min-width="168" />
           <el-table-column label="商品" min-width="180">
             <template #default="{ row }">{{ orderItemsText(row) }}</template>
@@ -104,7 +108,7 @@ function orderItemsText(order: Order) {
           <el-table-column label="下单时间" width="118">
             <template #default="{ row }: { row: Order }">{{ formatDate(row.createdAt) }}</template>
           </el-table-column>
-          <el-table-column label="操作" width="108" fixed="right">
+          <el-table-column label="操作" width="108" fixed="right" align="left" header-align="left">
             <template #default="{ row }: { row: Order }">
               <AppButton
                 v-if="statusMeta[row.status].action"
@@ -125,10 +129,13 @@ function orderItemsText(order: Order) {
           <template #header>
             <div class="panel-title compact">
               <strong>库存预警 ({{ lowStockDishes.length }})</strong>
-              <AppButton link type="primary" :icon="Right" @click="$emit('goDishes')">商品管理</AppButton>
+              <PanelNavLink label="商品管理" @click="$emit('goDishes')" />
             </div>
           </template>
-          <el-table :data="lowStockDishes" size="small" max-height="240" empty-text="库存充足">
+          <el-table :data="lowStockDishes" size="small" max-height="240">
+            <template #empty>
+              <ListEmptyState compact variant="product" title="库存充足" description="当前没有低库存或售罄商品" />
+            </template>
             <el-table-column prop="name" label="商品" min-width="120" />
             <el-table-column prop="stock" label="剩余库存" width="92" />
             <el-table-column label="状态" width="88">
@@ -152,7 +159,7 @@ function orderItemsText(order: Order) {
               </div>
             </div>
           </div>
-          <el-empty v-else description="今日暂无销量" :image-size="72" />
+          <ListEmptyState v-else compact variant="product" title="今日暂无销量" description="有订单成交后会在这里显示热销商品" />
         </el-card>
       </div>
     </div>
